@@ -1,0 +1,17 @@
+
+node_modules
+pnpm-lock.yaml
+.turbo
+.ddev/.downloads
+.ddev/.importdb
+apps/wp/public/wp-content/uploads
+apps/wp/public/wp-config.php
+.env
+.env.*
+!.env.example
+**/.DS_Store
+.active-site
+apps/astro/astro.config.*.mjs
+dist
+build
+theme.zip

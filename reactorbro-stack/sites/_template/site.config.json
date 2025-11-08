@@ -1,0 +1,82 @@
+{
+  "$schema": "../site-config.schema.json",
+  "name": "New Site Name",
+  "id": "new-site-id",
+  "description": "Brief description of the site",
+  "domain": {
+    "production": "https://example.com",
+    "staging": "https://staging.example.com",
+    "preview": "https://preview.example.com"
+  },
+  "wordpress": {
+    "url": "https://example.com",
+    "restApi": "https://example.com/wp-json/wp/v2",
+    "graphql": "https://example.com/graphql",
+    "local": {
+      "enabled": true,
+      "url": "https://reactorjet.ddev.site",
+      "adminUser": "admin",
+      "adminPassword": "admin"
+    }
+  },
+  "astro": {
+    "port": 4321,
+    "output": "static",
+    "adapter": "cloudflare",
+    "srcDir": "src"
+  },
+  "deployment": {
+    "platform": "cloudflare-pages",
+    "projectId": "new-site-id",
+    "branch": {
+      "production": "main",
+      "preview": "dev/*"
+    },
+    "buildCommand": "pnpm site:build new-site-id",
+    "outputDir": "dist"
+  },
+  "seo": {
+    "title": "Site Title - Tagline",
+    "description": "Site description for search engines and social media",
+    "locale": "en-US",
+    "twitter": "@handle"
+  },
+  "features": {
+    "blog": true,
+    "ecommerce": false,
+    "multilingual": false,
+    "search": false,
+    "comments": false
+  },
+  "contact": {
+    "email": "contact@example.com",
+    "phone": "+1 234 567 8900",
+    "address": "City, State, Country",
+    "socialMedia": {
+      "facebook": "https://facebook.com/handle",
+      "twitter": "https://twitter.com/handle",
+      "linkedin": "https://linkedin.com/company/handle",
+      "instagram": "https://instagram.com/handle"
+    }
+  },
+  "analytics": {
+    "googleAnalytics": "",
+    "googleTagManager": "",
+    "plausible": "",
+    "fathom": ""
+  },
+  "theme": {
+    "primaryColor": "#3b82f6",
+    "fontFamily": "system-ui, -apple-system, sans-serif",
+    "logo": "/assets/logo.svg"
+  },
+  "env": {
+    "SITE_URL": "https://example.com",
+    "WP_URL": "https://example.com",
+    "WP_REST_API": "https://example.com/wp-json/wp/v2",
+    "CONTACT_EMAIL": "contact@example.com"
+  },
+  "status": "development",
+  "createdAt": "2024-01-01T00:00:00Z",
+  "updatedAt": "2024-01-01T00:00:00Z"
+}

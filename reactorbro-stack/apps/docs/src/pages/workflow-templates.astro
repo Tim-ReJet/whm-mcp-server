@@ -1,0 +1,122 @@
+---
+import DocLayout from '../layouts/DocLayout.astro';
+import { workflowTemplates } from '../../../../packages/scripts/src/workflow-templates.js';
+
+const templates = workflowTemplates.getAllTemplates();
+const categories = [...new Set(templates.map(t => t.category))];
+---
+
+<DocLayout title="Workflow Templates">
+  <div class="max-w-7xl mx-auto">
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold mb-4">Workflow Templates</h1>
+      <p class="text-gray-600 dark:text-gray-400">
+        Browse and use pre-built workflow templates
+      </p>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="mb-6 flex gap-2 flex-wrap">
+      <button
+        onclick="filterTemplates('all')"
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+      >
+        All
+      </button>
+      {categories.map((category) => (
+        <button
+          onclick={`filterTemplates('${category}')`}
+          class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 text-sm"
+        >
+          {category.charAt(0).toUpperCase() + category.slice(1)}
+        </button>
+      ))}
+    </div>
+
+    <!-- Templates Grid -->
+    <div id="templates-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {templates.map((template) => (
+        <div
+          class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow"
+          data-category={template.category}
+        >
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h3 class="text-xl font-semibold mb-2">{template.name}</h3>
+              <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs">
+                {template.category}
+              </span>
+            </div>
+          </div>
+
+          <p class="text-gray-600 dark:text-gray-400 mb-4 text-sm">
+            {template.description}
+          </p>
+
+          <div class="flex flex-wrap gap-2 mb-4">
+            {template.tags.map((tag) => (
+              <span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+            <div>
+              <div class="text-gray-500 dark:text-gray-400">Duration</div>
+              <div class="font-semibold">{(template.estimatedDuration / 60000).toFixed(1)}m</div>
+            </div>
+            <div>
+              <div class="text-gray-500 dark:text-gray-400">Steps</div>
+              <div class="font-semibold">{template.workflow.steps.length}</div>
+            </div>
+          </div>
+
+          <div class="flex gap-2">
+            <button
+              onclick={`useTemplate('${template.id}')`}
+              class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+            >
+              Use Template
+            </button>
+            <button
+              onclick={`viewTemplate('${template.id}')`}
+              class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 text-sm"
+            >
+              View
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <script>
+    function filterTemplates(category) {
+      const grid = document.getElementById('templates-grid');
+      if (!grid) return;
+
+      const cards = grid.querySelectorAll('[data-category]');
+      cards.forEach((card) => {
+        if (category === 'all' || card.getAttribute('data-category') === category) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    function useTemplate(templateId) {
+      console.log('Using template:', templateId);
+      // Would navigate to workflow editor with template loaded
+      window.location.href = `/workflow-editor?template=${templateId}`;
+    }
+
+    function viewTemplate(templateId) {
+      console.log('Viewing template:', templateId);
+      // Would show template details
+      alert(`Viewing template: ${templateId}`);
+    }
+  </script>
+</DocLayout>
+

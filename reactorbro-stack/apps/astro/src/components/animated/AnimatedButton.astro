@@ -1,0 +1,528 @@
+---
+/**
+ * AnimatedButton Component
+ *
+ * An interactive button with smooth hover, tap, and focus animations.
+ * Includes ripple effect and accessibility features.
+ *
+ * @example
+ * ```astro
+ * <AnimatedButton>Click Me</AnimatedButton>
+ * ```
+ *
+ * @example
+ * ```astro
+ * <AnimatedButton
+ *   variant="primary"
+ *   size="large"
+ *   href="/contact"
+ * >
+ *   Get Started
+ * </AnimatedButton>
+ * ```
+ */
+
+interface Props {
+  /**
+   * Button variant/style
+   * @default 'primary'
+   */
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'link';
+
+  /**
+   * Button size
+   * @default 'medium'
+   */
+  size?: 'small' | 'medium' | 'large';
+
+  /**
+   * Animation style
+   * @default 'scale'
+   */
+  animation?: 'scale' | 'lift' | 'magnetic' | 'ripple' | 'none';
+
+  /**
+   * Link URL (renders as <a> instead of <button>)
+   */
+  href?: string;
+
+  /**
+   * Link target
+   * @default '_self'
+   */
+  target?: string;
+
+  /**
+   * Button type (if not a link)
+   * @default 'button'
+   */
+  type?: 'button' | 'submit' | 'reset';
+
+  /**
+   * Disabled state
+   * @default false
+   */
+  disabled?: boolean;
+
+  /**
+   * Loading state (shows loading animation)
+   * @default false
+   */
+  loading?: boolean;
+
+  /**
+   * Full width button
+   * @default false
+   */
+  fullWidth?: boolean;
+
+  /**
+   * Additional CSS classes
+   */
+  class?: string;
+
+  /**
+   * Disable animations
+   * @default false
+   */
+  disableAnimation?: boolean;
+
+  /**
+   * Icon position
+   */
+  iconPosition?: 'left' | 'right';
+
+  /**
+   * ARIA label for accessibility
+   */
+  ariaLabel?: string;
+}
+
+const {
+  variant = 'primary',
+  size = 'medium',
+  animation = 'scale',
+  href,
+  target = '_self',
+  type = 'button',
+  disabled = false,
+  loading = false,
+  fullWidth = false,
+  class: className = '',
+  disableAnimation = false,
+  iconPosition,
+  ariaLabel,
+} = Astro.props;
+
+// Generate unique ID for this instance
+const instanceId = `animated-button-${Math.random().toString(36).substring(2, 9)}`;
+const ButtonTag = href ? 'a' : 'button';
+
+const buttonClasses = [
+  'animated-button',
+  `variant-${variant}`,
+  `size-${size}`,
+  animation !== 'none' && !disableAnimation ? `anim-${animation}` : '',
+  fullWidth ? 'full-width' : '',
+  disabled ? 'disabled' : '',
+  loading ? 'loading' : '',
+  className,
+].filter(Boolean).join(' ');
+---
+
+<ButtonTag
+  id={instanceId}
+  href={href}
+  target={href ? target : undefined}
+  type={!href ? type : undefined}
+  disabled={disabled || loading}
+  class={buttonClasses}
+  data-animation={animation}
+  aria-label={ariaLabel}
+  aria-busy={loading}
+  aria-disabled={disabled}
+>
+  {loading && (
+    <span class="spinner" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="50.265" stroke-dashoffset="25" />
+      </svg>
+    </span>
+  )}
+  <span class={`button-content ${loading ? 'loading' : ''}`}>
+    <slot />
+  </span>
+  {animation === 'ripple' && <span class="ripple-container" aria-hidden="true"></span>}
+</ButtonTag>
+
+<script>
+  // anime.js uses CommonJS exports
+  const anime = require('animejs');
+
+  /**
+   * Check if user prefers reduced motion
+   */
+  function prefersReducedMotion(): boolean {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  /**
+   * Initialize button animations
+   */
+  function initButtonAnimations() {
+    const buttons = document.querySelectorAll('.animated-button');
+
+    buttons.forEach((button) => {
+      const element = button as HTMLElement;
+      const animationType = element.dataset.animation;
+
+      if (!animationType || animationType === 'none' || prefersReducedMotion()) {
+        return;
+      }
+
+      switch (animationType) {
+        case 'magnetic':
+          initMagneticEffect(element);
+          break;
+        case 'ripple':
+          initRippleEffect(element);
+          break;
+        // scale and lift are handled by CSS
+      }
+    });
+  }
+
+  /**
+   * Magnetic button effect
+   */
+  function initMagneticEffect(button: HTMLElement) {
+    let isHovering = false;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isHovering) return;
+
+      const rect = button.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+
+      // Limit movement to 20px
+      const maxMove = 20;
+      const moveX = Math.max(-maxMove, Math.min(maxMove, x * 0.3));
+      const moveY = Math.max(-maxMove, Math.min(maxMove, y * 0.3));
+
+      anime({
+        targets: button,
+        translateX: moveX,
+        translateY: moveY,
+        duration: 300,
+        easing: 'easeOutQuad',
+      });
+    };
+
+    const handleMouseEnter = () => {
+      isHovering = true;
+    };
+
+    const handleMouseLeave = () => {
+      isHovering = false;
+      anime({
+        targets: button,
+        translateX: 0,
+        translateY: 0,
+        duration: 400,
+        easing: 'easeOutElastic(1, .5)',
+      });
+    };
+
+    button.addEventListener('mouseenter', handleMouseEnter);
+    button.addEventListener('mousemove', handleMouseMove);
+    button.addEventListener('mouseleave', handleMouseLeave);
+  }
+
+  /**
+   * Ripple effect on click
+   */
+  function initRippleEffect(button: HTMLElement) {
+    const handleClick = (e: MouseEvent) => {
+      const rippleContainer = button.querySelector('.ripple-container');
+      if (!rippleContainer) return;
+
+      const rect = button.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      // Create ripple element
+      const ripple = document.createElement('span');
+      ripple.classList.add('ripple');
+      ripple.style.left = `${x}px`;
+      ripple.style.top = `${y}px`;
+      rippleContainer.appendChild(ripple);
+
+      // Animate ripple
+      anime({
+        targets: ripple,
+        scale: [0, 2.5],
+        opacity: [0.5, 0],
+        duration: 600,
+        easing: 'easeOutExpo',
+        complete: () => {
+          ripple.remove();
+        },
+      });
+    };
+
+    button.addEventListener('click', handleClick);
+  }
+
+  /**
+   * Entrance animation for buttons
+   */
+  function animateButtonEntrance() {
+    const buttons = document.querySelectorAll('.animated-button[data-entrance="true"]');
+
+    buttons.forEach((button, index) => {
+      const element = button as HTMLElement;
+
+      if (prefersReducedMotion()) {
+        element.style.opacity = '1';
+        element.style.transform = 'none';
+        return;
+      }
+
+      anime({
+        targets: element,
+        opacity: [0, 1],
+        scale: [0.8, 1],
+        duration: 400,
+        delay: index * 50,
+        easing: 'easeOutBack',
+      });
+    });
+  }
+
+  // Initialize on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      initButtonAnimations();
+      animateButtonEntrance();
+    });
+  } else {
+    initButtonAnimations();
+    animateButtonEntrance();
+  }
+
+  // Re-initialize on Astro view transitions
+  document.addEventListener('astro:page-load', () => {
+    initButtonAnimations();
+    animateButtonEntrance();
+  });
+</script>
+
+<style>
+  .animated-button {
+    /* Base styles */
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: inherit;
+    font-weight: 500;
+    line-height: 1;
+    text-decoration: none;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    overflow: hidden;
+    white-space: nowrap;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Sizes */
+  .animated-button.size-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .animated-button.size-medium {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .animated-button.size-large {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+  }
+
+  /* Variants */
+  .animated-button.variant-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .animated-button.variant-secondary {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .animated-button.variant-outline {
+    background: transparent;
+    color: currentColor;
+    border: 2px solid currentColor;
+  }
+
+  .animated-button.variant-ghost {
+    background: transparent;
+    color: currentColor;
+  }
+
+  .animated-button.variant-link {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    text-decoration: underline;
+  }
+
+  /* Full width */
+  .animated-button.full-width {
+    width: 100%;
+  }
+
+  /* Animation: Scale */
+  .animated-button.anim-scale {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .animated-button.anim-scale:hover:not(.disabled):not(.loading) {
+    transform: scale(1.05);
+  }
+
+  .animated-button.anim-scale:active:not(.disabled):not(.loading) {
+    transform: scale(0.95);
+  }
+
+  /* Animation: Lift */
+  .animated-button.anim-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .animated-button.anim-lift:hover:not(.disabled):not(.loading) {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  .animated-button.anim-lift:active:not(.disabled):not(.loading) {
+    transform: translateY(-2px);
+  }
+
+  /* Animation: Magnetic - handled by JS */
+  .animated-button.anim-magnetic {
+    transition: transform 0.3s ease;
+  }
+
+  /* Animation: Ripple */
+  .ripple-container {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .ripple {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    margin-left: -10px;
+    margin-top: -10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    pointer-events: none;
+  }
+
+  /* Loading state */
+  .animated-button.loading {
+    pointer-events: none;
+    opacity: 0.7;
+  }
+
+  .button-content.loading {
+    opacity: 0;
+  }
+
+  .spinner {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .spinner svg {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Disabled state */
+  .animated-button.disabled,
+  .animated-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* Focus styles for accessibility */
+  .animated-button:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  /* Hover states for variants */
+  .animated-button.variant-primary:hover:not(.disabled):not(.loading) {
+    background: linear-gradient(135deg, #7c93f0 0%, #8b5bb8 100%);
+  }
+
+  .animated-button.variant-secondary:hover:not(.disabled):not(.loading) {
+    background: linear-gradient(135deg, #f5a3fc 0%, #f76b7d 100%);
+  }
+
+  .animated-button.variant-outline:hover:not(.disabled):not(.loading) {
+    background: currentColor;
+    color: white;
+  }
+
+  .animated-button.variant-ghost:hover:not(.disabled):not(.loading) {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  /* Respect reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .animated-button,
+    .animated-button * {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    .animated-button:hover,
+    .animated-button:active {
+      transform: none !important;
+    }
+  }
+
+  /* Dark mode support */
+  @media (prefers-color-scheme: dark) {
+    .animated-button.variant-ghost:hover:not(.disabled):not(.loading) {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+</style>

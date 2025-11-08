@@ -1,0 +1,128 @@
+{
+  "name": "Warm Organic Palette",
+  "description": "A warm, earthy color palette perfect for wellness, natural products, and sustainable brands",
+  "version": "1.0.0",
+  "style": "organic",
+  "colors": {
+    "primary": {
+      "50": "#FEF3E2",
+      "100": "#FCE7C6",
+      "200": "#F9CF8D",
+      "300": "#F6B654",
+      "400": "#F39C1B",
+      "500": "#E8890C",
+      "600": "#C67108",
+      "700": "#9E5A06",
+      "800": "#764304",
+      "900": "#4E2C03",
+      "950": "#261601",
+      "default": "#E8890C"
+    },
+    "secondary": {
+      "50": "#F5F3F0",
+      "100": "#E8E4DD",
+      "200": "#D1C9BB",
+      "300": "#BAAE99",
+      "400": "#A39377",
+      "500": "#8C7855",
+      "600": "#706044",
+      "700": "#544833",
+      "800": "#383022",
+      "900": "#1C1811",
+      "950": "#0E0C09",
+      "default": "#8C7855"
+    },
+    "accent": {
+      "50": "#F0F5ED",
+      "100": "#E1EBDB",
+      "200": "#C3D7B7",
+      "300": "#A5C393",
+      "400": "#87AF6F",
+      "500": "#699B4B",
+      "600": "#547C3C",
+      "700": "#3F5D2D",
+      "800": "#2A3E1E",
+      "900": "#151F0F",
+      "950": "#0B1008",
+      "default": "#699B4B"
+    },
+    "neutral": {
+      "50": "#FAF9F7",
+      "100": "#F5F3EF",
+      "200": "#EBE7DF",
+      "300": "#D7D0C3",
+      "400": "#B5AA99",
+      "500": "#93856F",
+      "600": "#756A58",
+      "700": "#585041",
+      "800": "#3A352B",
+      "900": "#1D1B15",
+      "950": "#0F0D0B",
+      "white": "#FFFFFF",
+      "black": "#1A1816"
+    },
+    "semantic": {
+      "success": {
+        "light": "#D4EDDA",
+        "default": "#699B4B",
+        "dark": "#3F5D2D"
+      },
+      "warning": {
+        "light": "#FFF3CD",
+        "default": "#F39C1B",
+        "dark": "#9E5A06"
+      },
+      "error": {
+        "light": "#F8D7DA",
+        "default": "#C74036",
+        "dark": "#842B23"
+      },
+      "info": {
+        "light": "#D9E8F5",
+        "default": "#6B9DBC",
+        "dark": "#456580"
+      }
+    }
+  },
+  "usage": {
+    "primary": "Use for warm accents, highlights, and energy elements",
+    "secondary": "Use for grounding elements, natural textures, and secondary actions",
+    "accent": "Use for growth, nature, and positive action elements",
+    "neutral": "Use for backgrounds, text, and natural surfaces",
+    "semantic": "Use for status indicators with natural feel"
+  },
+  "accessibility": {
+    "wcagLevel": "AA",
+    "contrastRatios": {
+      "primary-on-white": 5.2,
+      "primary-on-neutral-50": 5.8,
+      "text-on-background": 13.5,
+      "neutral-900-on-white": 15.2
+    }
+  },
+  "pairings": {
+    "typography": {
+      "headings": ["Playfair Display", "Libre Baskerville", "Merriweather"],
+      "body": ["Source Sans Pro", "Open Sans", "Lato"]
+    },
+    "industries": [
+      "wellness",
+      "organic food",
+      "sustainable products",
+      "natural cosmetics",
+      "eco-friendly brands",
+      "artisan crafts"
+    ]
+  },
+  "mood": {
+    "keywords": ["warm", "natural", "earthy", "authentic", "organic", "sustainable"],
+    "associations": ["nature", "wellness", "growth", "harmony", "balance"]
+  },
+  "metadata": {
+    "tags": ["warm", "organic", "natural", "earthy", "wellness", "sustainable", "accessible"],
+    "category": "color-palette",
+    "author": "ReactorBro Design System",
+    "createdAt": "2024-01-01",
+    "updatedAt": "2024-01-01"
+  }
+}

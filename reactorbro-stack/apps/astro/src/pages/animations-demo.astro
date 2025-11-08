@@ -1,0 +1,580 @@
+---
+/**
+ * Animations Demo Page
+ * Showcases all animated components from the ReactorBro Stack Phase 3
+ */
+import Layout from '../layouts/Layout.astro';
+import AnimatedHero from '../components/animated/AnimatedHero.astro';
+import AnimatedSection from '../components/animated/AnimatedSection.astro';
+import AnimatedCard from '../components/animated/AnimatedCard.astro';
+import AnimatedButton from '../components/animated/AnimatedButton.astro';
+
+const projects = [
+  {
+    title: 'Residential Complex',
+    description: 'Modern luxury apartments with sustainable design',
+    image: '/placeholder-project-1.jpg'
+  },
+  {
+    title: 'Commercial Tower',
+    description: 'State-of-the-art office building in downtown',
+    image: '/placeholder-project-2.jpg'
+  },
+  {
+    title: 'Infrastructure Project',
+    description: 'Highway expansion and modernization',
+    image: '/placeholder-project-3.jpg'
+  },
+  {
+    title: 'Green Building',
+    description: 'LEED-certified sustainable construction',
+    image: '/placeholder-project-4.jpg'
+  },
+  {
+    title: 'Urban Renewal',
+    description: 'Historic district revitalization',
+    image: '/placeholder-project-5.jpg'
+  },
+  {
+    title: 'Industrial Facility',
+    description: 'Manufacturing plant with modern amenities',
+    image: '/placeholder-project-6.jpg'
+  },
+];
+
+const features = [
+  {
+    icon: '🎬',
+    title: 'Smooth Animations',
+    description: 'Professional-grade animations that enhance user experience'
+  },
+  {
+    icon: '♿',
+    title: 'Accessible',
+    description: 'Respects prefers-reduced-motion and includes ARIA labels'
+  },
+  {
+    icon: '⚡',
+    title: 'Performant',
+    description: 'Optimized for 60 FPS with adaptive quality'
+  },
+  {
+    icon: '🎨',
+    title: 'Customizable',
+    description: 'Multiple animation styles and configuration options'
+  },
+];
+---
+
+<Layout title="Animations Demo - ReactorBro Stack">
+  <!-- Hero Section with Parallax -->
+  <AnimatedHero
+    title="ReactorBro Stack"
+    subtitle="Phase 3: Advanced Animations"
+    backgroundImage="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=2000"
+    parallax={true}
+    height="full"
+  >
+    <p>Experience production-quality animations built with anime.js, Framer Motion, and GSAP</p>
+    <div slot="cta">
+      <AnimatedButton href="#features" variant="primary" size="large" animation="ripple">
+        Explore Features
+      </AnimatedButton>
+      <AnimatedButton href="#demos" variant="outline" size="large" animation="lift">
+        View Demos
+      </AnimatedButton>
+    </div>
+  </AnimatedHero>
+
+  <!-- Features Section -->
+  <section id="features" class="features-section">
+    <div class="container">
+      <AnimatedSection animationType="fade">
+        <h2>Why Choose Our Animation System?</h2>
+        <p class="section-subtitle">Production-ready, accessible, and blazing fast</p>
+      </AnimatedSection>
+
+      <div class="features-grid">
+        {features.map((feature, i) => (
+          <AnimatedCard
+            animationType="scale"
+            hoverEffect="lift"
+            delay={i * 100}
+            class="feature-card"
+          >
+            <div class="feature-icon">{feature.icon}</div>
+            <h3>{feature.title}</h3>
+            <p>{feature.description}</p>
+          </AnimatedCard>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects Grid Section -->
+  <section id="demos" class="projects-section">
+    <div class="container">
+      <AnimatedSection animationType="slide" direction="up">
+        <h2>Featured Projects</h2>
+        <p class="section-subtitle">See our animated cards in action</p>
+      </AnimatedSection>
+
+      <div class="projects-grid">
+        {projects.map((project, i) => (
+          <AnimatedCard
+            animationType="slide"
+            direction="up"
+            hoverEffect="glow"
+            delay={i * 80}
+            class="project-card"
+          >
+            <div class="project-image">
+              <div class="project-image-placeholder">{project.title[0]}</div>
+            </div>
+            <div class="project-content">
+              <h3>{project.title}</h3>
+              <p>{project.description}</p>
+              <AnimatedButton variant="ghost" size="small" animation="scale">
+                View Details →
+              </AnimatedButton>
+            </div>
+          </AnimatedCard>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Button Variants Section -->
+  <section class="buttons-section">
+    <div class="container">
+      <AnimatedSection animationType="fade">
+        <h2>Button Animations</h2>
+        <p class="section-subtitle">Interactive buttons with different effects</p>
+      </AnimatedSection>
+
+      <AnimatedSection animationType="fade" delay={200}>
+        <div class="button-group">
+          <div class="button-demo">
+            <h4>Scale Effect</h4>
+            <AnimatedButton variant="primary" animation="scale">
+              Hover Me
+            </AnimatedButton>
+          </div>
+
+          <div class="button-demo">
+            <h4>Lift Effect</h4>
+            <AnimatedButton variant="secondary" animation="lift">
+              Hover Me
+            </AnimatedButton>
+          </div>
+
+          <div class="button-demo">
+            <h4>Magnetic Effect</h4>
+            <AnimatedButton variant="primary" animation="magnetic">
+              Move Cursor
+            </AnimatedButton>
+          </div>
+
+          <div class="button-demo">
+            <h4>Ripple Effect</h4>
+            <AnimatedButton variant="secondary" animation="ripple">
+              Click Me
+            </AnimatedButton>
+          </div>
+        </div>
+
+        <div class="button-group" style="margin-top: 2rem;">
+          <AnimatedButton variant="outline" size="small">Small</AnimatedButton>
+          <AnimatedButton variant="outline" size="medium">Medium</AnimatedButton>
+          <AnimatedButton variant="outline" size="large">Large</AnimatedButton>
+        </div>
+
+        <div class="button-group" style="margin-top: 2rem;">
+          <AnimatedButton variant="primary">Primary</AnimatedButton>
+          <AnimatedButton variant="secondary">Secondary</AnimatedButton>
+          <AnimatedButton variant="outline">Outline</AnimatedButton>
+          <AnimatedButton variant="ghost">Ghost</AnimatedButton>
+          <AnimatedButton variant="link">Link</AnimatedButton>
+        </div>
+      </AnimatedSection>
+    </div>
+  </section>
+
+  <!-- Animation Types Section -->
+  <section class="animation-types-section">
+    <div class="container">
+      <AnimatedSection animationType="fade">
+        <h2>Animation Types</h2>
+        <p class="section-subtitle">Different entrance animations for sections</p>
+      </AnimatedSection>
+
+      <div class="animation-demos-grid">
+        <AnimatedCard animationType="fade" hoverEffect="none" class="demo-card">
+          <h4>Fade In</h4>
+          <p>Simple opacity transition</p>
+          <code>animationType="fade"</code>
+        </AnimatedCard>
+
+        <AnimatedCard animationType="slide" direction="up" delay={100} hoverEffect="none" class="demo-card">
+          <h4>Slide Up</h4>
+          <p>Fade + translate from bottom</p>
+          <code>animationType="slide" direction="up"</code>
+        </AnimatedCard>
+
+        <AnimatedCard animationType="slide" direction="left" delay={200} hoverEffect="none" class="demo-card">
+          <h4>Slide Left</h4>
+          <p>Fade + translate from right</p>
+          <code>animationType="slide" direction="left"</code>
+        </AnimatedCard>
+
+        <AnimatedCard animationType="scale" delay={300} hoverEffect="none" class="demo-card">
+          <h4>Scale In</h4>
+          <p>Fade + scale from 90%</p>
+          <code>animationType="scale"</code>
+        </AnimatedCard>
+
+        <AnimatedCard animationType="zoom" delay={400} hoverEffect="none" class="demo-card">
+          <h4>Zoom In</h4>
+          <p>Fade + scale from 0%</p>
+          <code>animationType="zoom"</code>
+        </AnimatedCard>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stagger Demo Section -->
+  <section class="stagger-section">
+    <div class="container">
+      <AnimatedSection animationType="fade">
+        <h2>Staggered Animations</h2>
+        <p class="section-subtitle">Elements animate in sequence</p>
+      </AnimatedSection>
+
+      <div class="stagger-demo">
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((num, i) => (
+          <AnimatedCard
+            animationType="scale"
+            delay={i * 50}
+            hoverEffect="scale"
+            class="stagger-item"
+          >
+            <span class="stagger-number">{num}</span>
+          </AnimatedCard>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container">
+      <AnimatedSection animationType="slide" direction="up">
+        <h2>Ready to Add Animations to Your Site?</h2>
+        <p>Get started with ReactorBro Stack Phase 3</p>
+        <div class="cta-buttons">
+          <AnimatedButton href="/contact" variant="primary" size="large" animation="ripple">
+            Get Started
+          </AnimatedButton>
+          <AnimatedButton href="/docs" variant="outline" size="large" animation="lift">
+            View Documentation
+          </AnimatedButton>
+        </div>
+      </AnimatedSection>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="demo-footer">
+    <div class="container">
+      <AnimatedSection animationType="fade">
+        <p>&copy; 2024 ReactorBro Stack. All rights reserved.</p>
+        <p class="footer-note">
+          Built with ❤️ using Astro, anime.js, Framer Motion, and GSAP
+        </p>
+      </AnimatedSection>
+    </div>
+  </footer>
+</Layout>
+
+<style>
+  /* Base Styles */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  section {
+    padding: 4rem 0;
+  }
+
+  h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .section-subtitle {
+    font-size: 1.25rem;
+    text-align: center;
+    opacity: 0.8;
+    margin-bottom: 3rem;
+  }
+
+  /* Features Section */
+  .features-section {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+
+  .feature-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    text-align: center;
+  }
+
+  .feature-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .feature-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .feature-card p {
+    opacity: 0.8;
+    line-height: 1.6;
+  }
+
+  /* Projects Section */
+  .projects-section {
+    background: white;
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+
+  .project-card {
+    background: #f8f9fa;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .project-image {
+    aspect-ratio: 16 / 9;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .project-image-placeholder {
+    font-size: 4rem;
+    font-weight: 700;
+    color: white;
+    opacity: 0.5;
+  }
+
+  .project-content {
+    padding: 1.5rem;
+  }
+
+  .project-content h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .project-content p {
+    opacity: 0.8;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+
+  /* Buttons Section */
+  .buttons-section {
+    background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+  }
+
+  .button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .button-demo {
+    text-align: center;
+  }
+
+  .button-demo h4 {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+    opacity: 0.7;
+  }
+
+  /* Animation Types Section */
+  .animation-types-section {
+    background: white;
+  }
+
+  .animation-demos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+  }
+
+  .demo-card {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    text-align: center;
+  }
+
+  .demo-card h4 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .demo-card p {
+    margin-bottom: 1rem;
+    opacity: 0.9;
+  }
+
+  .demo-card code {
+    display: block;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-family: 'Courier New', monospace;
+    word-break: break-all;
+  }
+
+  /* Stagger Section */
+  .stagger-section {
+    background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+  }
+
+  .stagger-demo {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .stagger-item {
+    aspect-ratio: 1;
+    background: white;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #667eea;
+  }
+
+  .stagger-number {
+    display: block;
+  }
+
+  /* CTA Section */
+  .cta-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-align: center;
+  }
+
+  .cta-section h2,
+  .cta-section p {
+    color: white;
+  }
+
+  .cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+  }
+
+  /* Footer */
+  .demo-footer {
+    background: #1a202c;
+    color: white;
+    padding: 2rem 0;
+    text-align: center;
+  }
+
+  .demo-footer p {
+    margin: 0.5rem 0;
+    opacity: 0.8;
+  }
+
+  .footer-note {
+    font-size: 0.875rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    section {
+      padding: 3rem 0;
+    }
+
+    .container {
+      padding: 1rem;
+    }
+
+    .features-grid,
+    .projects-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .button-group {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .animation-demos-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .stagger-demo {
+      grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    }
+
+    .cta-buttons {
+      flex-direction: column;
+    }
+  }
+
+  /* Print Styles */
+  @media print {
+    section {
+      page-break-inside: avoid;
+    }
+
+    .demo-footer {
+      display: none;
+    }
+  }
+</style>

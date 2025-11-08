@@ -1,0 +1,347 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+
+// Fetch About content from WordPress
+const WP_URL = 'https://bergprojects.co.za';
+
+let aboutContent = {
+  title: 'About Us',
+  introduction: 'Berg Projects is a professional handyman and property maintenance company serving Pretoria and the greater Gauteng region.',
+  philosophy: 'We strive to create an environment of trust and clarity, through partnership that ensures the successful delivery of all projects.'
+};
+
+try {
+  const response = await fetch(`${WP_URL}/wp-json/wp/v2/pages?slug=about-us`);
+  const data = await response.json();
+  if (data.length > 0) {
+    aboutContent = {
+      title: data[0].title.rendered || aboutContent.title,
+      introduction: data[0].excerpt.rendered.replace(/<[^>]*>/g, '') || aboutContent.introduction,
+      philosophy: aboutContent.philosophy
+    };
+  }
+} catch (error) {
+  console.error('Error fetching About content:', error);
+}
+
+const values = [
+  {
+    icon: '🤝',
+    title: 'Partnership',
+    description: 'We build strong relationships with clients, consultants, and contractors for seamless project delivery.'
+  },
+  {
+    icon: '🎯',
+    title: 'Excellence',
+    description: 'Committed to delivering world-class quality in every project we undertake.'
+  },
+  {
+    icon: '💡',
+    title: 'Innovation',
+    description: 'Award-winning projects for innovation, speed of delivery, and quality standards.'
+  },
+  {
+    icon: '💰',
+    title: 'Value',
+    description: 'Proactive budget management with proven cost savings averaging 13% through value engineering.'
+  },
+  {
+    icon: '⚡',
+    title: 'Efficiency',
+    description: 'Early project completion (±6 weeks ahead) through efficient coordination and planning.'
+  },
+  {
+    icon: '✓',
+    title: 'Integrity',
+    description: 'Transparency and honesty in all our business dealings and project communications.'
+  }
+];
+
+const milestones = [
+  { year: '2015', event: 'Company Founded', description: 'Berg Projects established in Gauteng' },
+  { year: '2017', event: '100+ Projects', description: 'Reached milestone of 100 completed projects' },
+  { year: '2020', event: 'ISO Certified', description: 'Achieved ISO quality certification' },
+  { year: '2024', event: '500+ Projects', description: 'Successfully delivered over 500 projects' }
+];
+---
+
+<MainLayout title="About Us" description="Learn about Berg Projects - professional construction and project management company with 15+ years of excellence">
+  <!-- Page Header -->
+  <section class="bg-gradient-to-br from-neutral-900 to-neutral-800 text-white py-20">
+    <div class="container-responsive">
+      <div class="max-w-4xl mx-auto text-center">
+        <div class="inline-block mb-4">
+          <span class="badge bg-primary-600 text-white text-sm px-4 py-2">
+            Our Story
+          </span>
+        </div>
+        <h1 class="text-5xl md:text-6xl font-bold mb-6">
+          About Berg Projects
+        </h1>
+        <p class="text-xl text-neutral-300">
+          15 Years of Excellence in Construction & Project Management
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Introduction Section -->
+  <section class="section bg-white">
+    <div class="container-responsive">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div class="space-y-6">
+          <h2 class="text-4xl font-bold text-neutral-900">
+            Who We Are
+          </h2>
+          <div class="prose prose-lg text-neutral-600">
+            <p>
+              Established in 2015, Berg Projects is a professional handyman and property maintenance company
+              serving Pretoria and the greater Gauteng region. We specialize in Design and Construction,
+              Project Management and Construction Management.
+            </p>
+            <p>
+              Our team comprises dedicated, hands-on management professionals whose experience started on site,
+              resulting in a good understanding of the basic principles of construction. This foundation has
+              honed our project management skills and ability to deliver excellence at every stage.
+            </p>
+            <p>
+              We have gained a reputation for managing budgets proactively and saving money for both clients
+              and project teams through value engineering, motivating teams to understand clients' business
+              needs and focus on core deliverables.
+            </p>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <div class="bg-primary-50 rounded-2xl p-8 border-l-4 border-primary-600">
+            <h3 class="text-2xl font-bold text-neutral-900 mb-4">Our Philosophy</h3>
+            <p class="text-lg text-neutral-700 leading-relaxed">
+              {aboutContent.philosophy}
+            </p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-neutral-50 rounded-xl p-6 text-center">
+              <div class="text-4xl font-bold text-primary-600 mb-2">15+</div>
+              <div class="text-sm text-neutral-600">Years Experience</div>
+            </div>
+            <div class="bg-neutral-50 rounded-xl p-6 text-center">
+              <div class="text-4xl font-bold text-primary-600 mb-2">500+</div>
+              <div class="text-sm text-neutral-600">Projects Delivered</div>
+            </div>
+            <div class="bg-neutral-50 rounded-xl p-6 text-center">
+              <div class="text-4xl font-bold text-primary-600 mb-2">R1bn+</div>
+              <div class="text-sm text-neutral-600">Value Completed</div>
+            </div>
+            <div class="bg-neutral-50 rounded-xl p-6 text-center">
+              <div class="text-4xl font-bold text-primary-600 mb-2">13%</div>
+              <div class="text-sm text-neutral-600">Avg. Cost Savings</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Values Section -->
+  <section class="section bg-neutral-50">
+    <div class="container-responsive">
+      <div class="text-center mb-16 max-w-3xl mx-auto">
+        <div class="inline-block mb-4">
+          <span class="badge bg-primary-100 text-primary-700 text-sm px-4 py-2">
+            What Drives Us
+          </span>
+        </div>
+        <h2 class="text-4xl md:text-5xl font-bold text-neutral-900 mb-4">
+          Our Core Values
+        </h2>
+        <p class="text-lg text-neutral-600">
+          The principles that guide everything we do
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {values.map((value, index) => (
+          <div class="card hover:shadow-xl transition-all duration-300 group" style={`animation-delay: ${index * 100}ms`}>
+            <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">
+              {value.icon}
+            </div>
+            <h3 class="text-xl font-semibold text-neutral-900 mb-3">
+              {value.title}
+            </h3>
+            <p class="text-neutral-600 leading-relaxed">
+              {value.description}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline Section -->
+  <section class="section bg-white">
+    <div class="container-responsive">
+      <div class="text-center mb-16 max-w-3xl mx-auto">
+        <div class="inline-block mb-4">
+          <span class="badge bg-primary-100 text-primary-700 text-sm px-4 py-2">
+            Our Journey
+          </span>
+        </div>
+        <h2 class="text-4xl md:text-5xl font-bold text-neutral-900 mb-4">
+          Company Milestones
+        </h2>
+        <p class="text-lg text-neutral-600">
+          A legacy of excellence and continuous growth
+        </p>
+      </div>
+
+      <div class="max-w-4xl mx-auto">
+        <div class="relative">
+          <!-- Timeline Line -->
+          <div class="hidden md:block absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-primary-200"></div>
+
+          <div class="space-y-12">
+            {milestones.map((milestone, index) => (
+              <div class={`relative flex items-center ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
+                <div class={`flex-1 ${index % 2 === 0 ? 'md:text-right md:pr-12' : 'md:text-left md:pl-12'}`}>
+                  <div class="bg-neutral-50 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                    <div class="text-3xl font-bold text-primary-600 mb-2">
+                      {milestone.year}
+                    </div>
+                    <h3 class="text-xl font-semibold text-neutral-900 mb-2">
+                      {milestone.event}
+                    </h3>
+                    <p class="text-neutral-600">
+                      {milestone.description}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Center Dot -->
+                <div class="hidden md:block absolute left-1/2 transform -translate-x-1/2 w-6 h-6 bg-primary-600 rounded-full border-4 border-white shadow-lg z-10"></div>
+
+                <div class="flex-1"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team/Leadership Section -->
+  <section class="section bg-neutral-50">
+    <div class="container-responsive">
+      <div class="text-center mb-16 max-w-3xl mx-auto">
+        <div class="inline-block mb-4">
+          <span class="badge bg-primary-100 text-primary-700 text-sm px-4 py-2">
+            Leadership
+          </span>
+        </div>
+        <h2 class="text-4xl md:text-5xl font-bold text-neutral-900 mb-4">
+          Our Management Team
+        </h2>
+        <p class="text-lg text-neutral-600">
+          Experienced professionals dedicated to your success
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <!-- Team Member 1 -->
+        <div class="card hover:shadow-xl transition-all duration-300">
+          <div class="w-32 h-32 bg-gradient-to-br from-primary-600 to-accent-500 rounded-full mx-auto mb-6 flex items-center justify-center text-white text-4xl font-bold">
+            MvdB
+          </div>
+          <div class="text-center">
+            <h3 class="text-2xl font-bold text-neutral-900 mb-2">
+              Marius van den Berg
+            </h3>
+            <p class="text-primary-600 font-medium mb-4">
+              Director & Founder
+            </p>
+            <div class="text-neutral-600 space-y-2 text-sm">
+              <p>Pr. CPM - Registered Professional Construction Project Manager</p>
+              <p>18+ years construction management experience</p>
+              <p>R1bn+ Design-Build work completed</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Team Member 2 -->
+        <div class="card hover:shadow-xl transition-all duration-300">
+          <div class="w-32 h-32 bg-gradient-to-br from-accent-500 to-primary-600 rounded-full mx-auto mb-6 flex items-center justify-center text-white text-4xl font-bold">
+            BP
+          </div>
+          <div class="text-center">
+            <h3 class="text-2xl font-bold text-neutral-900 mb-2">
+              Professional Team
+            </h3>
+            <p class="text-primary-600 font-medium mb-4">
+              Expert Project Managers
+            </p>
+            <div class="text-neutral-600 space-y-2 text-sm">
+              <p>Certified project management professionals</p>
+              <p>25+ years combined experience</p>
+              <p>Proven track record of success</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Certifications Section -->
+  <section class="section bg-white">
+    <div class="container-responsive">
+      <div class="max-w-4xl mx-auto">
+        <div class="bg-gradient-to-br from-primary-600 to-accent-600 rounded-2xl p-12 text-white text-center">
+          <h2 class="text-3xl md:text-4xl font-bold mb-6">
+            Certified & Qualified
+          </h2>
+          <p class="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">
+            We maintain the highest industry standards through continuous professional development and certification
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+              <div class="text-4xl mb-3">🏆</div>
+              <div class="font-semibold mb-1">ISO Certified</div>
+              <div class="text-sm text-primary-100">Quality Management</div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+              <div class="text-4xl mb-3">📜</div>
+              <div class="font-semibold mb-1">Registered</div>
+              <div class="text-sm text-primary-100">Professional CPM</div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+              <div class="text-4xl mb-3">✓</div>
+              <div class="font-semibold mb-1">Compliant</div>
+              <div class="text-sm text-primary-100">Safety Standards</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="section bg-neutral-50">
+    <div class="container-responsive">
+      <div class="max-w-4xl mx-auto text-center">
+        <h2 class="text-4xl font-bold text-neutral-900 mb-6">
+          Ready to Work With Us?
+        </h2>
+        <p class="text-xl text-neutral-600 mb-8">
+          Let's discuss how we can help with your next project
+        </p>
+        <div class="flex flex-wrap gap-4 justify-center">
+          <a href="/contact" class="btn btn-primary text-lg px-8 py-4">
+            Contact Us Today
+          </a>
+          <a href="/projects" class="btn btn-secondary text-lg px-8 py-4">
+            View Our Work
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</MainLayout>

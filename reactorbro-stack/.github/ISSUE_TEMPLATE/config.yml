@@ -1,0 +1,25 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentation
+    url: https://github.com/your-org/reactorbro-stack/blob/main/README.md
+    about: Read the project documentation and setup guides
+
+  - name: 💬 Team Discussion
+    url: https://github.com/your-org/reactorbro-stack/discussions
+    about: Ask questions and discuss ideas with the team
+
+  - name: 🆘 Getting Help
+    url: https://github.com/your-org/reactorbro-stack/discussions/categories/q-a
+    about: Get help with setup, configuration, or development issues
+
+  - name: 📖 UI Package Docs
+    url: https://github.com/your-org/reactorbro-stack/blob/main/packages/ui/README.md
+    about: Documentation for shared UI utilities and components
+
+  - name: 🔧 Troubleshooting Guide
+    url: https://github.com/your-org/reactorbro-stack/blob/main/README.md#-troubleshooting
+    about: Common issues and their solutions
+
+  - name: 🚀 Deployment Guide
+    url: https://github.com/your-org/reactorbro-stack/blob/main/README.md#-deployment
+    about: Instructions for deploying to Cloudflare Pages and VPS

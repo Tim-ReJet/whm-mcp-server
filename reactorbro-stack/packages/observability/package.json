@@ -1,0 +1,39 @@
+{
+  "name": "@repo/observability",
+  "version": "1.0.0",
+  "description": "Unified observability system for logging, metrics, and performance monitoring",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./logging": {
+      "import": "./dist/logging/logger.js",
+      "types": "./dist/logging/logger.d.ts"
+    },
+    "./metrics": {
+      "import": "./dist/metrics/metrics.js",
+      "types": "./dist/metrics/metrics.d.ts"
+    },
+    "./performance": {
+      "import": "./dist/performance/monitor.js",
+      "types": "./dist/performance/monitor.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.6.3",
+    "vitest": "^1.0.0"
+  }
+}
+

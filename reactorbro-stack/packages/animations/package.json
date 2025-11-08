@@ -1,0 +1,31 @@
+{
+  "name": "@repo/animations",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Cutting-edge modern animation library using Web Animations API, View Transitions, and CSS Scroll-driven Animations",
+  "exports": {
+    ".": "./src/index.ts",
+    "./motion": "./src/motion/presets.ts",
+    "./view-transitions": "./src/view-transitions/index.ts",
+    "./scroll-driven": "./src/scroll-driven/index.ts",
+    "./gsap": "./src/gsap/index.ts",
+    "./utils": "./src/utils/index.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@motionone/dom": "^10.18.0",
+    "@motionone/utils": "^10.18.0",
+    "gsap": "^3.12.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.6.3",
+    "vitest": "^1.6.0"
+  }
+}

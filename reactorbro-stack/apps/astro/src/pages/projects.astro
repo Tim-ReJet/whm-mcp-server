@@ -1,0 +1,354 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import AnimatedSection from '../components/animated/AnimatedSection.astro';
+import AnimatedCard from '../components/animated/AnimatedCard.astro';
+import AnimatedButton from '../components/animated/AnimatedButton.astro';
+
+// Fetch Projects from WordPress REST API
+const WP_URL = 'https://bergprojects.co.za';
+
+let projects = [];
+
+try {
+  const response = await fetch(`${WP_URL}/wp-json/wp/v2/posts?per_page=12&_embed`);
+  const data = await response.json();
+
+  projects = data.map((post: any) => ({
+    id: post.id,
+    title: post.title.rendered,
+    excerpt: post.excerpt.rendered.replace(/<[^>]*>/g, '').substring(0, 150) + '...',
+    image: post._embedded?.['wp:featuredmedia']?.[0]?.source_url || null,
+    link: post.link,
+    date: new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
+  }));
+} catch (error) {
+  console.error('Error fetching projects:', error);
+  // Fallback projects if API fails
+  projects = [
+    {
+      id: 1,
+      title: 'TFG Lord\'s View',
+      excerpt: 'Commercial development project in Midrand. Comprehensive construction management and delivery.',
+      image: null,
+      date: 'February 2017',
+      location: 'Midrand'
+    },
+    {
+      id: 2,
+      title: 'Gunners Circle',
+      excerpt: 'Industrial facility construction in Epping. Turnkey design and construct solution.',
+      image: null,
+      date: 'July 2016',
+      location: 'Epping'
+    },
+    {
+      id: 3,
+      title: '12 Montague Drive',
+      excerpt: 'Commercial property development in Cape Town. Project management and coordination.',
+      image: null,
+      date: 'May 2016',
+      location: 'Cape Town'
+    },
+    {
+      id: 4,
+      title: 'Container World',
+      excerpt: 'Specialized container facility at Airport Industria. Fast-track construction delivery.',
+      image: null,
+      date: 'December 2014',
+      location: 'Airport Industria'
+    },
+    {
+      id: 5,
+      title: 'OSLR Saldanha',
+      excerpt: 'Large-scale industrial project in Saldanha. Construction management excellence.',
+      image: null,
+      date: 'February 2014',
+      location: 'Saldanha'
+    },
+    {
+      id: 6,
+      title: 'Dundas Park',
+      excerpt: 'Industrial development in Parow Industria. Complete project delivery and coordination.',
+      image: null,
+      date: 'December 2014',
+      location: 'Parow Industria'
+    }
+  ];
+}
+
+const categories = [
+  'All Projects',
+  'Commercial',
+  'Industrial',
+  'Residential',
+  'Infrastructure'
+];
+
+const stats = [
+  { value: '500+', label: 'Projects Completed' },
+  { value: 'R1bn+', label: 'Total Value' },
+  { value: '15+', label: 'Years Experience' },
+  { value: '100%', label: 'Client Satisfaction' }
+];
+---
+
+<MainLayout title="Our Projects" description="Browse Berg Projects portfolio - 500+ completed construction and project management projects across South Africa">
+  <!-- Page Header -->
+  <section class="bg-gradient-to-br from-neutral-900 to-neutral-800 text-white py-20">
+    <div class="container-responsive">
+      <AnimatedSection animationType="fade">
+        <div class="max-w-4xl mx-auto text-center">
+          <div class="inline-block mb-4">
+            <span class="badge bg-primary-600 text-white text-sm px-4 py-2">
+              Portfolio
+            </span>
+          </div>
+          <h1 class="text-5xl md:text-6xl font-bold mb-6">
+            Our Projects
+          </h1>
+          <p class="text-xl text-neutral-300">
+            Showcasing excellence in construction and project management across South Africa
+          </p>
+        </div>
+      </AnimatedSection>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="section bg-white border-b border-neutral-200">
+    <div class="container-responsive">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        {stats.map((stat, index) => (
+          <AnimatedCard
+            animationType="scale"
+            hoverEffect="lift"
+            delay={index * 100}
+            class="text-center p-6 bg-transparent border-none shadow-none"
+          >
+            <div class="text-4xl md:text-5xl font-bold text-primary-600 mb-2">
+              {stat.value}
+            </div>
+            <div class="text-sm text-neutral-600 font-medium">
+              {stat.label}
+            </div>
+          </AnimatedCard>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Filter Section -->
+  <section class="section bg-neutral-50 py-8">
+    <div class="container-responsive">
+      <div class="flex flex-wrap gap-3 justify-center">
+        {categories.map((category, index) => (
+          <button
+            class={`px-6 py-3 rounded-full font-medium transition-all ${
+              index === 0
+                ? 'bg-primary-600 text-white shadow-lg'
+                : 'bg-white text-neutral-700 hover:bg-neutral-100 border border-neutral-200'
+            }`}
+            data-filter={category.toLowerCase().replace(' ', '-')}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects Grid -->
+  <section class="section bg-white">
+    <div class="container-responsive">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {projects.map((project, index) => (
+          <AnimatedCard
+            animationType="slide"
+            direction="up"
+            hoverEffect="lift"
+            delay={index * 80}
+            class="card overflow-hidden"
+          >
+            <!-- Project Image -->
+            <div class="aspect-video bg-gradient-to-br from-primary-100 to-accent-100 rounded-xl overflow-hidden mb-6 relative">
+              {project.image ? (
+                <img
+                  src={project.image}
+                  alt={project.title}
+                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+              ) : (
+                <div class="w-full h-full flex items-center justify-center">
+                  <div class="text-center">
+                    <div class="text-6xl text-primary-400 mb-2">🏗️</div>
+                    <div class="text-sm text-neutral-600 font-medium">Project Image</div>
+                  </div>
+                </div>
+              )}
+
+              <!-- Overlay Badge -->
+              <div class="absolute top-4 right-4">
+                <span class="badge bg-white/90 backdrop-blur-sm text-neutral-900 text-xs px-3 py-1">
+                  {project.date || project.location || 'Completed'}
+                </span>
+              </div>
+            </div>
+
+            <!-- Project Info -->
+            <div class="space-y-4">
+              <div>
+                <h3 class="text-2xl font-bold text-neutral-900 mb-2 group-hover:text-primary-600 transition-colors">
+                  {project.title}
+                </h3>
+                <p class="text-neutral-600 leading-relaxed line-clamp-3">
+                  {project.excerpt}
+                </p>
+              </div>
+
+              {project.location && (
+                <div class="flex items-center gap-2 text-sm text-neutral-500">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                  <span>{project.location}</span>
+                </div>
+              )}
+
+              <div class="pt-4 border-t border-neutral-100">
+                <AnimatedButton
+                  href={project.link || '#'}
+                  variant="ghost"
+                  size="small"
+                  animation="scale"
+                  class="text-primary-600"
+                >
+                  View Details →
+                </AnimatedButton>
+              </div>
+            </div>
+          </AnimatedCard>
+        ))}
+      </div>
+
+      <!-- Load More Button -->
+      {projects.length >= 12 && (
+        <AnimatedSection animationType="fade" delay={200}>
+          <div class="text-center mt-12">
+            <AnimatedButton variant="secondary" size="large" animation="ripple">
+              Load More Projects
+            </AnimatedButton>
+          </div>
+        </AnimatedSection>
+      )}
+    </div>
+  </section>
+
+  <!-- Project Types Section -->
+  <section class="section bg-neutral-50">
+    <div class="container-responsive">
+      <AnimatedSection animationType="fade">
+        <div class="text-center mb-16 max-w-3xl mx-auto">
+          <div class="inline-block mb-4">
+            <span class="badge bg-primary-100 text-primary-700 text-sm px-4 py-2">
+              Our Expertise
+            </span>
+          </div>
+          <h2 class="text-4xl md:text-5xl font-bold text-neutral-900 mb-4">
+            Project Types
+          </h2>
+          <p class="text-lg text-neutral-600">
+            Diverse experience across multiple sectors
+          </p>
+        </div>
+      </AnimatedSection>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="card hover:shadow-xl transition-all duration-300 group text-center">
+          <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">🏢</div>
+          <h3 class="text-xl font-semibold text-neutral-900 mb-2">Commercial</h3>
+          <p class="text-neutral-600 text-sm">Office buildings, retail spaces, and commercial developments</p>
+        </div>
+
+        <div class="card hover:shadow-xl transition-all duration-300 group text-center">
+          <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">🏭</div>
+          <h3 class="text-xl font-semibold text-neutral-900 mb-2">Industrial</h3>
+          <p class="text-neutral-600 text-sm">Warehouses, factories, and industrial facilities</p>
+        </div>
+
+        <div class="card hover:shadow-xl transition-all duration-300 group text-center">
+          <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">🏘️</div>
+          <h3 class="text-xl font-semibold text-neutral-900 mb-2">Residential</h3>
+          <p class="text-neutral-600 text-sm">Housing developments and residential complexes</p>
+        </div>
+
+        <div class="card hover:shadow-xl transition-all duration-300 group text-center">
+          <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">🛣️</div>
+          <h3 class="text-xl font-semibold text-neutral-900 mb-2">Infrastructure</h3>
+          <p class="text-neutral-600 text-sm">Roads, utilities, and civil engineering projects</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonial Section -->
+  <section class="section bg-white">
+    <div class="container-responsive">
+      <div class="max-w-4xl mx-auto">
+        <div class="bg-gradient-to-br from-primary-600 to-accent-600 rounded-2xl p-12 text-white text-center">
+          <div class="text-5xl mb-6">⭐⭐⭐⭐⭐</div>
+          <blockquote class="text-2xl font-semibold mb-6">
+            "Exceptional project management and delivery. Berg Projects completed our facility ahead of schedule and under budget."
+          </blockquote>
+          <div class="text-primary-100">
+            — Happy Client, Commercial Development
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="section bg-neutral-50">
+    <div class="container-responsive">
+      <div class="max-w-4xl mx-auto text-center">
+        <h2 class="text-4xl font-bold text-neutral-900 mb-6">
+          Start Your Next Project
+        </h2>
+        <p class="text-xl text-neutral-600 mb-8">
+          Ready to bring your construction vision to life? Let's talk about your project.
+        </p>
+        <div class="flex flex-wrap gap-4 justify-center">
+          <a href="/contact" class="btn btn-primary text-lg px-8 py-4">
+            Get a Free Quote
+          </a>
+          <a href="/services" class="btn btn-secondary text-lg px-8 py-4">
+            View Services
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</MainLayout>
+
+<script>
+  // Filter functionality (placeholder)
+  const filterButtons = document.querySelectorAll('[data-filter]');
+
+  filterButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // Remove active class from all buttons
+      filterButtons.forEach(btn => {
+        btn.classList.remove('bg-primary-600', 'text-white', 'shadow-lg');
+        btn.classList.add('bg-white', 'text-neutral-700', 'border', 'border-neutral-200');
+      });
+
+      // Add active class to clicked button
+      button.classList.remove('bg-white', 'text-neutral-700', 'border', 'border-neutral-200');
+      button.classList.add('bg-primary-600', 'text-white', 'shadow-lg');
+
+      // Filter projects (would need actual implementation)
+      console.log('Filter by:', button.dataset.filter);
+    });
+  });
+</script>

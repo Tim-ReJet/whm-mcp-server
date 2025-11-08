@@ -1,0 +1,161 @@
+name: 🐛 Bug Report
+description: Report a bug or unexpected behavior
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the sections below to help us understand and fix the issue.
+
+  - type: dropdown
+    id: bug-area
+    attributes:
+      label: Area
+      description: Which part of the project is affected?
+      options:
+        - Astro Frontend
+        - WordPress Backend
+        - GraphQL API
+        - Design Tokens
+        - UI Components
+        - Build System / Turbo
+        - DDEV / Local Environment
+        - Deployment / CI/CD
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe the bug...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Detailed steps to reproduce the behavior
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: I expected...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: Instead, this happened...
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Please provide your environment details
+      value: |
+        - **OS**: [e.g., macOS 14.0, Windows 11, Ubuntu 22.04]
+        - **Node Version**: [e.g., 18.19.0]
+        - **pnpm Version**: [e.g., 9.0.0]
+        - **Browser**: [e.g., Chrome 120, Safari 17]
+        - **DDEV Version**: [e.g., v1.22.0]
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs / Console Output
+      description: If applicable, paste any error messages or console output
+      placeholder: Paste logs here...
+      render: shell
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots / Screen Recordings
+      description: If applicable, add screenshots or recordings to help explain the problem
+      placeholder: Drag and drop images/videos here or paste URLs
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this bug?
+      options:
+        - Critical - Blocks development/production
+        - High - Major functionality broken
+        - Medium - Feature partially broken
+        - Low - Minor issue or cosmetic
+    validations:
+      required: true
+
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: Frequency
+      description: How often does this bug occur?
+      options:
+        - Always - Happens every time
+        - Often - Happens more than 50% of the time
+        - Sometimes - Happens occasionally
+        - Rarely - Happened once or twice
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: workaround
+    attributes:
+      label: Workaround Available?
+      description: Have you found a temporary workaround?
+      options:
+        - label: I have found a workaround (please describe below)
+        - label: This is blocking my work
+
+  - type: textarea
+    id: workaround-description
+    attributes:
+      label: Workaround Description
+      description: If you found a workaround, please describe it here
+      placeholder: Describe your workaround...
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here
+      placeholder: Any additional information...
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched for similar issues before creating this one
+          required: true
+        - label: I have provided all the requested information
+          required: true
+        - label: I have tested this on the latest version
+          required: true

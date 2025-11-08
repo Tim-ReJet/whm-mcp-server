@@ -1,0 +1,339 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import AnimatedHero from '../components/animated/AnimatedHero.astro';
+import AnimatedSection from '../components/animated/AnimatedSection.astro';
+import AnimatedCard from '../components/animated/AnimatedCard.astro';
+import AnimatedButton from '../components/animated/AnimatedButton.astro';
+
+// Fetch content from WordPress REST API
+const WP_URL = 'https://bergprojects.co.za';
+
+// Fetch homepage content
+let homeContent = {
+  title: 'Berg Projects',
+  tagline: 'Design · Construction · Project Management',
+  description: 'Professional construction and project management services across South Africa'
+};
+
+try {
+  const response = await fetch(`${WP_URL}/wp-json/wp/v2/pages?slug=home-02`);
+  const data = await response.json();
+  if (data.length > 0) {
+    homeContent = {
+      title: data[0].title.rendered || homeContent.title,
+      description: data[0].excerpt.rendered.replace(/<[^>]*>/g, '') || homeContent.description,
+      tagline: homeContent.tagline
+    };
+  }
+} catch (error) {
+  console.error('Error fetching WordPress content:', error);
+}
+
+const services = [
+  {
+    icon: '🏗️',
+    title: 'Construction Management',
+    description: 'Partnering with our clients, acting in their interest and managing every element of the project, from programme to cost.'
+  },
+  {
+    icon: '📋',
+    title: 'Project Management',
+    description: 'Flexible and highly personalised service based on a robust and well-proven formula for delivery.'
+  },
+  {
+    icon: '🏢',
+    title: 'Development Management',
+    description: 'Experience with development management and the project management function to assist with feasibility mapping.'
+  },
+  {
+    icon: '🔧',
+    title: 'Turnkey Design & Construct',
+    description: 'One point of contact with responsibility for design, construction, financial and quality control process.'
+  }
+];
+
+const stats = [
+  { value: '15+', label: 'Years Experience' },
+  { value: '500+', label: 'Projects Completed' },
+  { value: 'R1bn+', label: 'Value Delivered' },
+  { value: '100%', label: 'Client Satisfaction' }
+];
+---
+
+<MainLayout title="Home" description={homeContent.description}>
+  <!-- Hero Section with Animated Components -->
+  <AnimatedHero
+    title="Building Excellence Since 2015"
+    subtitle="Berg Projects"
+    backgroundImage="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=2000"
+    height="large"
+    parallax={true}
+    overlayOpacity={0.7}
+  >
+    <p class="text-xl">
+      {homeContent.tagline}
+    </p>
+    <p class="text-lg opacity-90">
+      Professional construction and project management services serving Pretoria and the greater Gauteng region.
+    </p>
+    <div slot="cta">
+      <AnimatedButton href="/contact" variant="primary" size="large" animation="ripple">
+        Get Started →
+      </AnimatedButton>
+      <AnimatedButton href="/projects" variant="outline" size="large" animation="lift">
+        View Projects
+      </AnimatedButton>
+    </div>
+  </AnimatedHero>
+
+  <!-- Stats Section -->
+  <section class="section bg-white border-b border-neutral-200">
+    <div class="container-responsive">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        {stats.map((stat, index) => (
+          <AnimatedCard
+            animationType="scale"
+            hoverEffect="lift"
+            delay={index * 100}
+            disableHover={false}
+            class="text-center p-6 bg-transparent border-none shadow-none"
+          >
+            <div class="text-4xl md:text-5xl font-bold text-primary-600 mb-2">
+              {stat.value}
+            </div>
+            <div class="text-sm text-neutral-600 font-medium">
+              {stat.label}
+            </div>
+          </AnimatedCard>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section class="section bg-neutral-50">
+    <div class="container-responsive">
+      <AnimatedSection animationType="fade">
+        <div class="text-center mb-16 max-w-3xl mx-auto">
+          <div class="inline-block mb-4">
+            <span class="badge bg-primary-100 text-primary-700 text-sm px-4 py-2">
+              What We Do
+            </span>
+          </div>
+          <h2 class="text-4xl md:text-5xl font-bold text-neutral-900 mb-4">
+            Our Services
+          </h2>
+          <p class="text-lg text-neutral-600">
+            Comprehensive construction and project management solutions tailored to your needs
+          </p>
+        </div>
+      </AnimatedSection>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {services.map((service, index) => (
+          <AnimatedCard
+            animationType="slide"
+            direction="up"
+            hoverEffect="lift"
+            delay={index * 100}
+            class="card group"
+          >
+            <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">
+              {service.icon}
+            </div>
+            <h3 class="text-xl font-semibold mb-3 text-neutral-900">
+              {service.title}
+            </h3>
+            <p class="text-neutral-600 leading-relaxed mb-4">
+              {service.description}
+            </p>
+            <AnimatedButton
+              href="/services"
+              variant="ghost"
+              size="small"
+              animation="scale"
+              class="text-primary-600 hover:text-primary-700"
+            >
+              Learn More →
+            </AnimatedButton>
+          </AnimatedCard>
+        ))}
+      </div>
+
+      <AnimatedSection animationType="fade" delay={400}>
+        <div class="text-center mt-12">
+          <AnimatedButton href="/services" variant="primary" size="large" animation="ripple">
+            View All Services
+          </AnimatedButton>
+        </div>
+      </AnimatedSection>
+    </div>
+  </section>
+
+  <!-- About Preview Section -->
+  <section class="section bg-white">
+    <div class="container-responsive">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <!-- Image Side -->
+        <AnimatedSection animationType="slide" direction="right">
+          <div class="relative">
+            <div class="aspect-square bg-gradient-to-br from-primary-600 to-accent-500 rounded-2xl overflow-hidden">
+              <div class="w-full h-full flex items-center justify-center text-white text-6xl font-bold">
+                BP
+              </div>
+            </div>
+
+            <!-- Floating Card -->
+            <div class="absolute -bottom-6 -right-6 bg-white rounded-xl shadow-2xl p-6 max-w-xs">
+              <div class="flex items-center gap-4">
+                <div class="w-16 h-16 bg-primary-600 rounded-lg flex items-center justify-center text-white text-2xl flex-shrink-0">
+                  🏆
+                </div>
+                <div>
+                  <div class="font-bold text-neutral-900">Award Winning</div>
+                  <div class="text-sm text-neutral-600">Innovation & Quality</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </AnimatedSection>
+
+        <!-- Content Side -->
+        <div class="space-y-6">
+          <AnimatedSection animationType="fade" delay={100}>
+            <div class="inline-block">
+              <span class="badge bg-primary-100 text-primary-700 text-sm px-4 py-2">
+                About Us
+              </span>
+            </div>
+          </AnimatedSection>
+
+          <AnimatedSection animationType="slide" direction="up" delay={200}>
+            <h2 class="text-4xl md:text-5xl font-bold text-neutral-900">
+              15 Years of Excellence
+            </h2>
+          </AnimatedSection>
+
+          <AnimatedSection animationType="fade" delay={300}>
+            <p class="text-lg text-neutral-600 leading-relaxed">
+              Berg Projects is a professional handyman and property maintenance company serving Pretoria and the greater Gauteng region. We specialize in design, construction, and project management services.
+            </p>
+          </AnimatedSection>
+
+          <div class="space-y-4">
+            <AnimatedSection animationType="slide" direction="left" delay={400}>
+              <div class="flex items-start gap-3">
+                <div class="w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0 mt-1">
+                  ✓
+                </div>
+                <div>
+                  <div class="font-semibold text-neutral-900">Professional Team</div>
+                  <div class="text-neutral-600">Experienced and certified professionals</div>
+                </div>
+              </div>
+            </AnimatedSection>
+
+            <AnimatedSection animationType="slide" direction="left" delay={500}>
+              <div class="flex items-start gap-3">
+                <div class="w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0 mt-1">
+                  ✓
+                </div>
+                <div>
+                  <div class="font-semibold text-neutral-900">Quality Guaranteed</div>
+                  <div class="text-neutral-600">ISO certified with proven track record</div>
+                </div>
+              </div>
+            </AnimatedSection>
+
+            <AnimatedSection animationType="slide" direction="left" delay={600}>
+              <div class="flex items-start gap-3">
+                <div class="w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0 mt-1">
+                  ✓
+                </div>
+                <div>
+                  <div class="font-semibold text-neutral-900">Client Focused</div>
+                  <div class="text-neutral-600">Tailored solutions for every project</div>
+                </div>
+              </div>
+            </AnimatedSection>
+          </div>
+
+          <AnimatedSection animationType="scale" delay={700}>
+            <div class="pt-4">
+              <AnimatedButton href="/about" variant="primary" size="large" animation="lift">
+                Learn More About Us
+              </AnimatedButton>
+            </div>
+          </AnimatedSection>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="section bg-gradient-to-br from-primary-600 via-primary-700 to-accent-600 text-white">
+    <div class="container-responsive">
+      <AnimatedSection animationType="scale">
+        <div class="max-w-4xl mx-auto text-center space-y-8">
+          <h2 class="text-4xl md:text-5xl font-bold">
+            Ready to Start Your Project?
+          </h2>
+          <p class="text-xl text-primary-100">
+            Let's discuss how we can help bring your construction vision to life
+          </p>
+          <div class="flex flex-wrap gap-4 justify-center">
+            <AnimatedButton
+              href="/contact"
+              variant="secondary"
+              size="large"
+              animation="ripple"
+              class="bg-white text-primary-600 hover:bg-neutral-50"
+            >
+              Contact Us Today
+            </AnimatedButton>
+            <AnimatedButton
+              href="tel:0833249054"
+              variant="outline"
+              size="large"
+              animation="lift"
+              class="border-white text-white hover:bg-white hover:text-primary-600"
+            >
+              📞 083 324 9054
+            </AnimatedButton>
+          </div>
+        </div>
+      </AnimatedSection>
+    </div>
+  </section>
+
+  <!-- Trust Section -->
+  <section class="section bg-neutral-900 text-white">
+    <div class="container-responsive">
+      <AnimatedSection animationType="fade">
+        <div class="text-center mb-12">
+          <h3 class="text-2xl font-bold mb-4">Trusted by Leading Organizations</h3>
+          <p class="text-neutral-400">Delivering excellence across South Africa</p>
+        </div>
+      </AnimatedSection>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 items-center">
+        {[
+          { icon: '🏢', label: 'Commercial' },
+          { icon: '🏭', label: 'Industrial' },
+          { icon: '🏗️', label: 'Residential' },
+          { icon: '🏛️', label: 'Public Sector' }
+        ].map((item, index) => (
+          <AnimatedCard
+            animationType="zoom"
+            hoverEffect="glow"
+            delay={index * 100}
+            class="text-center p-6 bg-neutral-800 rounded-lg"
+          >
+            <div class="text-4xl mb-2">{item.icon}</div>
+            <div class="text-sm">{item.label}</div>
+          </AnimatedCard>
+        ))}
+      </div>
+    </div>
+  </section>
+</MainLayout>

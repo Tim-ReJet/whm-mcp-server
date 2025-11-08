@@ -1,0 +1,78 @@
+{
+  "$schema": "../site-config.schema.json",
+  "name": "Berg Projects",
+  "id": "berg-projects",
+  "description": "Professional construction and project management company website",
+  "domain": {
+    "production": "https://bergprojects.co.za",
+    "staging": "https://staging-bergprojects.pages.dev",
+    "preview": "https://preview-bergprojects.pages.dev"
+  },
+  "wordpress": {
+    "url": "https://bergprojects.co.za",
+    "restApi": "https://bergprojects.co.za/wp-json/wp/v2",
+    "graphql": "https://bergprojects.co.za/graphql",
+    "local": {
+      "enabled": true,
+      "url": "https://reactorjet.ddev.site",
+      "adminUser": "admin",
+      "adminPassword": "admin"
+    }
+  },
+  "astro": {
+    "port": 4322,
+    "output": "static",
+    "adapter": "cloudflare",
+    "srcDir": "src"
+  },
+  "deployment": {
+    "platform": "cloudflare-pages",
+    "projectId": "berg-projects",
+    "branch": {
+      "production": "main",
+      "preview": "dev/*"
+    },
+    "buildCommand": "pnpm site:build berg-projects",
+    "outputDir": "dist"
+  },
+  "seo": {
+    "title": "Berg Projects - Construction & Project Management",
+    "description": "Professional construction management, project management, and development services across South Africa. 15+ years of experience delivering excellence.",
+    "locale": "en-ZA",
+    "twitter": "@bergprojects"
+  },
+  "features": {
+    "blog": true,
+    "ecommerce": false,
+    "multilingual": false,
+    "search": false,
+    "comments": false
+  },
+  "contact": {
+    "email": "marius@bergpartnerships.co.za",
+    "phone": "083 324 9054",
+    "address": "Pretoria, Gauteng, South Africa",
+    "socialMedia": {
+      "linkedin": "https://linkedin.com/company/berg-projects",
+      "facebook": "https://facebook.com/bergprojects"
+    }
+  },
+  "analytics": {
+    "googleAnalytics": "G-XXXXXXXXXX",
+    "googleTagManager": ""
+  },
+  "theme": {
+    "primaryColor": "#1d4ed8",
+    "fontFamily": "system-ui, -apple-system, sans-serif",
+    "logo": "/assets/berg-logo.svg"
+  },
+  "env": {
+    "SITE_URL": "https://bergprojects.co.za",
+    "WP_URL": "https://bergprojects.co.za",
+    "WP_REST_API": "https://bergprojects.co.za/wp-json/wp/v2",
+    "CONTACT_EMAIL": "marius@bergpartnerships.co.za"
+  },
+  "status": "active",
+  "createdAt": "2024-11-03T00:00:00Z",
+  "updatedAt": "2024-11-03T00:00:00Z"
+}

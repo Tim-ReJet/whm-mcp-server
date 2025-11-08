@@ -1,0 +1,280 @@
+---
+import DocLayout from '../layouts/DocLayout.astro';
+---
+
+<DocLayout title="Performance Dashboard">
+  <div class="max-w-7xl mx-auto">
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold mb-4">Performance Dashboard</h1>
+      <p class="text-gray-600 dark:text-gray-400">
+        Monitor system performance, workflow execution, and resource utilization
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <!-- Workflow Metrics -->
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Workflow Metrics</h2>
+        <div id="workflow-metrics" class="space-y-4">
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Total Executions</span>
+            <span id="workflow-total" class="font-semibold">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Running</span>
+            <span id="workflow-running" class="font-semibold text-blue-600">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Completed</span>
+            <span id="workflow-completed" class="font-semibold text-green-600">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Failed</span>
+            <span id="workflow-failed" class="font-semibold text-red-600">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Avg Duration</span>
+            <span id="workflow-avg-duration" class="font-semibold">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Avg Tokens</span>
+            <span id="workflow-avg-tokens" class="font-semibold">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cache Metrics -->
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Cache Metrics</h2>
+        <div id="cache-metrics" class="space-y-4">
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Hit Rate</span>
+            <span id="cache-hit-rate" class="font-semibold">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Total Hits</span>
+            <span id="cache-hits" class="font-semibold text-green-600">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Total Misses</span>
+            <span id="cache-misses" class="font-semibold text-yellow-600">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Cache Size</span>
+            <span id="cache-size" class="font-semibold">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resource Metrics -->
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Resource Utilization</h2>
+        <div id="resource-metrics" class="space-y-4">
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Max Concurrent</span>
+            <span id="resource-max" class="font-semibold">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Current Usage</span>
+            <span id="resource-current" class="font-semibold">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Utilization</span>
+            <span id="resource-utilization" class="font-semibold">-</span>
+          </div>
+          <div class="mt-4">
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
+              <div id="resource-bar" class="bg-blue-600 h-4 rounded-full transition-all" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Build Metrics -->
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Build Metrics</h2>
+        <div id="build-metrics" class="space-y-4">
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Avg Build Time</span>
+            <span id="build-avg-time" class="font-semibold">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Last Build Time</span>
+            <span id="build-last-time" class="font-semibold">-</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Avg Bundle Size</span>
+            <span id="build-avg-size" class="font-semibold">-</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alerts -->
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-4">Performance Alerts</h2>
+      <div id="alerts-list" class="space-y-2">
+        <p class="text-gray-500 dark:text-gray-400">Loading alerts...</p>
+      </div>
+    </div>
+
+    <!-- Execution History -->
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+      <h2 class="text-xl font-semibold mb-4">Recent Executions</h2>
+      <div id="execution-history" class="space-y-2">
+        <p class="text-gray-500 dark:text-gray-400">Loading history...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3003/api';
+
+    async function loadMetrics() {
+      try {
+        const response = await fetch(`${API_BASE}/metrics`);
+        const metrics = await response.json();
+        updateMetrics(metrics);
+      } catch (error) {
+        console.error('Failed to load metrics:', error);
+      }
+    }
+
+    function updateMetrics(metrics) {
+      // Workflow metrics
+      document.getElementById('workflow-total').textContent = metrics.workflows?.total || 0;
+      document.getElementById('workflow-running').textContent = metrics.workflows?.running || 0;
+      document.getElementById('workflow-completed').textContent = metrics.workflows?.completed || 0;
+      document.getElementById('workflow-failed').textContent = metrics.workflows?.failed || 0;
+      document.getElementById('workflow-avg-duration').textContent =
+        metrics.workflows?.averageDuration
+          ? `${(metrics.workflows.averageDuration / 1000).toFixed(1)}s`
+          : '-';
+      document.getElementById('workflow-avg-tokens').textContent =
+        metrics.workflows?.averageTokens
+          ? metrics.workflows.averageTokens.toLocaleString()
+          : '-';
+
+      // Cache metrics
+      document.getElementById('cache-hit-rate').textContent =
+        metrics.cache?.hitRate
+          ? `${(metrics.cache.hitRate * 100).toFixed(1)}%`
+          : '-';
+      document.getElementById('cache-hits').textContent = metrics.cache?.totalHits || 0;
+      document.getElementById('cache-misses').textContent = metrics.cache?.totalMisses || 0;
+      document.getElementById('cache-size').textContent =
+        metrics.cache?.size
+          ? `${(metrics.cache.size / 1024 / 1024).toFixed(2)} MB`
+          : '-';
+
+      // Resource metrics
+      document.getElementById('resource-max').textContent = metrics.resources?.maxConcurrent || 0;
+      document.getElementById('resource-current').textContent = metrics.resources?.currentUsage || 0;
+      const utilization = metrics.resources?.utilization || 0;
+      document.getElementById('resource-utilization').textContent = `${(utilization * 100).toFixed(1)}%`;
+      document.getElementById('resource-bar').style.width = `${utilization * 100}%`;
+
+      // Build metrics
+      document.getElementById('build-avg-time').textContent =
+        metrics.build?.averageBuildTime
+          ? `${(metrics.build.averageBuildTime / 1000).toFixed(1)}s`
+          : '-';
+      document.getElementById('build-last-time').textContent =
+        metrics.build?.lastBuildTime
+          ? `${(metrics.build.lastBuildTime / 1000).toFixed(1)}s`
+          : '-';
+      document.getElementById('build-avg-size').textContent =
+        metrics.build?.averageBundleSize
+          ? `${(metrics.build.averageBundleSize / 1024).toFixed(2)} KB`
+          : '-';
+    }
+
+    async function loadAlerts() {
+      try {
+        const response = await fetch(`${API_BASE}/alerts?limit=10`);
+        const alerts = await response.json();
+        displayAlerts(alerts);
+      } catch (error) {
+        console.error('Failed to load alerts:', error);
+      }
+    }
+
+    function displayAlerts(alerts) {
+      const container = document.getElementById('alerts-list');
+      if (!container) return;
+
+      if (alerts.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 dark:text-gray-400">No alerts</p>';
+        return;
+      }
+
+      container.innerHTML = alerts.map(alert => {
+        const color = alert.type === 'error' ? 'red' : alert.type === 'warning' ? 'yellow' : 'blue';
+        return `
+          <div class="p-3 bg-${color}-50 dark:bg-${color}-900/20 border border-${color}-200 dark:border-${color}-700 rounded">
+            <div class="flex justify-between items-start">
+              <div>
+                <div class="font-semibold text-${color}-800 dark:text-${color}-200">${alert.message}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  ${alert.metric}: ${alert.value} (threshold: ${alert.threshold})
+                </div>
+              </div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                ${new Date(alert.timestamp).toLocaleTimeString()}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function loadHistory() {
+      try {
+        const response = await fetch(`${API_BASE}/history?limit=10`);
+        const history = await response.json();
+        displayHistory(history);
+      } catch (error) {
+        console.error('Failed to load history:', error);
+      }
+    }
+
+    function displayHistory(history) {
+      const container = document.getElementById('execution-history');
+      if (!container) return;
+
+      if (history.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 dark:text-gray-400">No execution history</p>';
+        return;
+      }
+
+      container.innerHTML = history.map(exec => `
+        <div class="p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded">
+          <div class="flex justify-between items-start">
+            <div>
+              <div class="font-semibold">Execution ${exec.startTime}</div>
+              <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Steps: ${exec.stepsCompleted}/${exec.stepsTotal} |
+                Duration: ${exec.duration ? `${(exec.duration / 1000).toFixed(1)}s` : 'N/A'} |
+                Tokens: ${exec.tokensUsed.toLocaleString()} |
+                Cache: ${exec.cacheHits}/${exec.cacheHits + exec.cacheMisses}
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Load data on page load
+    loadMetrics();
+    loadAlerts();
+    loadHistory();
+
+    // Auto-refresh every 5 seconds
+    setInterval(() => {
+      loadMetrics();
+      loadAlerts();
+      loadHistory();
+    }, 5000);
+  </script>
+</DocLayout>
+

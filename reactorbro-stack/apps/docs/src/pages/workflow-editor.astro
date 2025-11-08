@@ -1,0 +1,1010 @@
+---
+import DocLayout from '../layouts/DocLayout.astro';
+---
+
+<DocLayout title="Workflow Editor">
+  <div class="max-w-7xl mx-auto">
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold mb-4">Workflow Editor</h1>
+      <p class="text-gray-600 dark:text-gray-400">
+        Create and edit agent workflows visually
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Workflow Canvas -->
+      <div class="lg:col-span-2">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Workflow Canvas</h2>
+            <div class="flex gap-2">
+              <button
+                onclick="addStep()"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+              >
+                + Add Step
+              </button>
+              <button
+                onclick="saveWorkflow()"
+                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+              >
+                Save
+              </button>
+              <button
+                onclick="executeWorkflow()"
+                class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm"
+                title="Execute workflow (Ctrl+E)"
+              >
+                ▶ Execute
+              </button>
+              <button
+                onclick="exportWorkflow('json')"
+                class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
+                title="Export as JSON (Ctrl+Shift+E)"
+              >
+                📥 Export JSON
+              </button>
+              <button
+                onclick="exportWorkflow('yaml')"
+                class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
+                title="Export as YAML (Ctrl+Shift+Y)"
+              >
+                📥 Export YAML
+              </button>
+            </div>
+          </div>
+
+          <!-- Canvas Controls -->
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex gap-2">
+              <button
+                onclick="zoomOut()"
+                class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded text-sm hover:bg-gray-300 dark:hover:bg-gray-600"
+                title="Zoom Out (-)"
+              >
+                −
+              </button>
+              <span id="zoom-level" class="px-3 py-1 text-sm">100%</span>
+              <button
+                onclick="zoomIn()"
+                class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded text-sm hover:bg-gray-300 dark:hover:bg-gray-600"
+                title="Zoom In (+)"
+              >
+                +
+              </button>
+              <button
+                onclick="resetZoom()"
+                class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded text-sm hover:bg-gray-300 dark:hover:bg-gray-600"
+                title="Reset Zoom (0)"
+              >
+                Reset
+              </button>
+              <button
+                onclick="autoLayout()"
+                class="px-3 py-1 bg-blue-200 dark:bg-blue-700 text-blue-800 dark:text-blue-200 rounded text-sm hover:bg-blue-300 dark:hover:bg-blue-600"
+                title="Auto Layout"
+              >
+                📐 Auto Layout
+              </button>
+            </div>
+            <div id="validation-status" class="text-sm"></div>
+          </div>
+
+          <!-- Canvas Container with Scroll -->
+          <div id="canvas-container" class="border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 overflow-auto relative" style="min-height: 500px; max-height: 600px;">
+            <div id="workflow-editor-canvas" class="relative" style="min-width: 1000px; min-height: 500px;">
+              <div class="text-center text-gray-500 dark:text-gray-400 py-20">
+                <p class="mb-4">Click "Add Step" to start building your workflow</p>
+                <p class="text-sm">Drag steps to reposition, click to edit</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Properties Panel -->
+      <div>
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 mb-6">
+          <h2 class="text-xl font-semibold mb-4">Properties</h2>
+          <div id="properties-panel" class="space-y-4">
+            <!-- Workflow Properties -->
+            <div id="workflow-properties">
+              <div>
+                <label class="block text-sm font-medium mb-2">Workflow Name</label>
+                <input
+                  type="text"
+                  id="workflow-name"
+                  placeholder="My Workflow"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900"
+                  oninput="validateWorkflow()"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-2">Description</label>
+                <textarea
+                  id="workflow-description"
+                  placeholder="Workflow description..."
+                  rows="3"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900"
+                  oninput="validateWorkflow()"
+                ></textarea>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-2">Max Concurrent</label>
+                <input
+                  type="number"
+                  id="max-concurrent"
+                  value="3"
+                  min="1"
+                  max="10"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900"
+                />
+              </div>
+            </div>
+
+            <!-- Step Properties (shown when step selected) -->
+            <div id="step-properties" class="hidden border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+              <h3 class="text-lg font-semibold mb-4">Step Properties</h3>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium mb-2">Step Name</label>
+                  <input
+                    type="text"
+                    id="step-name"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900"
+                    oninput="updateSelectedStep()"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2">Agent</label>
+                  <select
+                    id="step-agent"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900"
+                    onchange="updateSelectedStep()"
+                  >
+                    <option value="design-agent">Design Agent</option>
+                    <option value="content-agent">Content Agent</option>
+                    <option value="seo-agent">SEO Agent</option>
+                    <option value="layout-agent">Layout Agent</option>
+                    <option value="graphic-design-agent">Graphic Design Agent</option>
+                    <option value="content-generation-agent">Content Generation Agent</option>
+                    <option value="seo-optimization-agent">SEO Optimization Agent</option>
+                    <option value="planning-agent">Planning Agent</option>
+                    <option value="development-agent">Development Agent</option>
+                    <option value="qa-agent">QA Agent</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2">Dependencies</label>
+                  <div id="step-dependencies" class="space-y-2 mb-2"></div>
+                  <select
+                    id="add-dependency"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-sm"
+                    onchange="addDependency(this.value)"
+                  >
+                    <option value="">Add dependency...</option>
+                  </select>
+                </div>
+                <div class="flex items-center gap-4">
+                  <label class="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="step-parallel"
+                      class="mr-2"
+                      onchange="updateSelectedStep()"
+                    />
+                    <span class="text-sm">Parallel</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="step-optional"
+                      class="mr-2"
+                      onchange="updateSelectedStep()"
+                    />
+                    <span class="text-sm">Optional</span>
+                  </label>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2">Timeout (ms)</label>
+                  <input
+                    type="number"
+                    id="step-timeout"
+                    value="300000"
+                    min="1000"
+                    step="1000"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900"
+                    oninput="updateSelectedStep()"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2">Retry Policy</label>
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <label class="text-xs text-gray-500">Max Attempts</label>
+                      <input
+                        type="number"
+                        id="step-retry-attempts"
+                        value="3"
+                        min="1"
+                        max="10"
+                        class="w-full px-2 py-1 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-sm"
+                        oninput="updateSelectedStep()"
+                      />
+                    </div>
+                    <div>
+                      <label class="text-xs text-gray-500">Delay (ms)</label>
+                      <input
+                        type="number"
+                        id="step-retry-delay"
+                        value="1000"
+                        min="100"
+                        step="100"
+                        class="w-full px-2 py-1 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-sm"
+                        oninput="updateSelectedStep()"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onclick="deleteSelectedStep()"
+                  class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
+                >
+                  Delete Step
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step Library -->
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+          <h2 class="text-xl font-semibold mb-4">Step Library</h2>
+          <div class="space-y-2">
+            <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800" onclick="addStepFromLibrary('design-agent')">
+              <div class="font-semibold">Design Agent</div>
+              <div class="text-sm text-gray-600 dark:text-gray-400">Graphic design tasks</div>
+            </div>
+            <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800" onclick="addStepFromLibrary('content-agent')">
+              <div class="font-semibold">Content Agent</div>
+              <div class="text-sm text-gray-600 dark:text-gray-400">Content generation</div>
+            </div>
+            <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800" onclick="addStepFromLibrary('seo-agent')">
+              <div class="font-semibold">SEO Agent</div>
+              <div class="text-sm text-gray-600 dark:text-gray-400">SEO optimization</div>
+            </div>
+            <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800" onclick="addStepFromLibrary('layout-agent')">
+              <div class="font-semibold">Layout Agent</div>
+              <div class="text-sm text-gray-600 dark:text-gray-400">Page layout design</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3001/api';
+    let workflowSteps = [];
+    let selectedStep = null;
+    let currentWorkflowId = null;
+    let zoomLevel = 1;
+    let panX = 0;
+    let panY = 0;
+    let isPanning = false;
+    let panStartX = 0;
+    let panStartY = 0;
+    let validationErrors = [];
+    let validationWarnings = [];
+
+    // Load workflows on page load
+    async function loadWorkflows() {
+      try {
+        const response = await fetch(`${API_BASE}/workflows`);
+        const workflows = await response.json();
+        console.log('Loaded workflows:', workflows);
+        // Could populate a workflow selector here
+      } catch (error) {
+        console.error('Failed to load workflows:', error);
+      }
+    }
+
+    async function addStep() {
+      const stepId = `step-${Date.now()}`;
+      const step = {
+        id: stepId,
+        name: 'New Step',
+        agent: 'design-agent',
+        x: Math.random() * 400 + 100,
+        y: Math.random() * 300 + 100,
+      };
+      workflowSteps.push(step);
+      renderCanvas();
+    }
+
+    async function addStepFromLibrary(agent) {
+      const stepId = `step-${Date.now()}`;
+      const step = {
+        id: stepId,
+        name: agent.replace('-agent', '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        agent: agent,
+        x: Math.random() * 400 + 100,
+        y: Math.random() * 300 + 100,
+      };
+      workflowSteps.push(step);
+      renderCanvas();
+    }
+
+    function renderCanvas() {
+      const canvas = document.getElementById('workflow-editor-canvas');
+      if (!canvas) return;
+
+      // Apply zoom and pan transforms
+      canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
+      canvas.style.transformOrigin = '0 0';
+
+      if (workflowSteps.length === 0) {
+        canvas.innerHTML = `
+          <div class="text-center text-gray-500 dark:text-gray-400 py-20">
+            <p class="mb-4">Click "Add Step" to start building your workflow</p>
+            <p class="text-sm">Drag steps to reposition, click to edit</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Render connections first (behind steps)
+      const connections = renderConnections();
+
+      // Render steps
+      const stepsHTML = workflowSteps.map(step => {
+        const isSelected = selectedStep && selectedStep.id === step.id;
+        const borderColor = isSelected
+          ? 'border-blue-500 dark:border-blue-400'
+          : 'border-gray-300 dark:border-gray-700';
+        const bgColor = isSelected
+          ? 'bg-blue-50 dark:bg-blue-900/20'
+          : 'bg-white dark:bg-gray-800';
+
+        return `
+          <div
+            id="${step.id}"
+            class="absolute p-4 ${bgColor} border-2 ${borderColor} rounded-lg cursor-move shadow-lg transition-all"
+            style="left: ${step.x}px; top: ${step.y}px; width: 200px; z-index: 10;"
+            onclick="selectStep('${step.id}')"
+          >
+            <div class="font-semibold mb-1">${step.name}</div>
+            <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">${step.agent}</div>
+            ${step.dependsOn && step.dependsOn.length > 0 ? `
+              <div class="text-xs text-gray-500 dark:text-gray-500">
+                Depends on: ${step.dependsOn.length}
+              </div>
+            ` : ''}
+            ${step.parallel ? '<div class="text-xs text-blue-600 dark:text-blue-400 mt-1">⚡ Parallel</div>' : ''}
+            ${step.optional ? '<div class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">○ Optional</div>' : ''}
+          </div>
+        `;
+      }).join('');
+
+      canvas.innerHTML = connections + stepsHTML;
+
+      // Make steps draggable
+      workflowSteps.forEach(step => {
+        const element = document.getElementById(step.id);
+        if (element) {
+          element.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            const rect = element.getBoundingClientRect();
+            const startX = e.clientX - (step.x * zoomLevel + panX);
+            const startY = e.clientY - (step.y * zoomLevel + panY);
+
+            const onMouseMove = (e) => {
+              const newX = (e.clientX - startX - panX) / zoomLevel;
+              const newY = (e.clientY - startY - panY) / zoomLevel;
+              step.x = Math.max(0, newX);
+              step.y = Math.max(0, newY);
+              renderCanvas();
+              validateWorkflow();
+            };
+
+            const onMouseUp = () => {
+              document.removeEventListener('mousemove', onMouseMove);
+              document.removeEventListener('mouseup', onMouseUp);
+            };
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+          });
+        }
+      });
+
+      // Enable panning on canvas background
+      canvas.addEventListener('mousedown', (e) => {
+        if (e.target === canvas || e.target.classList.contains('canvas-background')) {
+          isPanning = true;
+          panStartX = e.clientX - panX;
+          panStartY = e.clientY - panY;
+        }
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (isPanning) {
+          panX = e.clientX - panStartX;
+          panY = e.clientY - panStartY;
+          renderCanvas();
+        }
+      });
+
+      document.addEventListener('mouseup', () => {
+        isPanning = false;
+      });
+    }
+
+    function renderConnections() {
+      if (workflowSteps.length === 0) return '';
+
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('class', 'absolute top-0 left-0 pointer-events-none');
+      svg.style.width = '100%';
+      svg.style.height = '100%';
+      svg.style.zIndex = '1';
+
+      workflowSteps.forEach(step => {
+        if (step.dependsOn && step.dependsOn.length > 0) {
+          step.dependsOn.forEach(depId => {
+            const depStep = workflowSteps.find(s => s.id === depId);
+            if (depStep) {
+              const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+              line.setAttribute('x1', depStep.x + 100);
+              line.setAttribute('y1', depStep.y + 50);
+              line.setAttribute('x2', step.x + 100);
+              line.setAttribute('y2', step.y + 50);
+              line.setAttribute('stroke', step.parallel ? '#3b82f6' : '#6b7280');
+              line.setAttribute('stroke-width', '2');
+              line.setAttribute('marker-end', 'url(#arrowhead)');
+              svg.appendChild(line);
+            }
+          });
+        }
+      });
+
+      // Add arrow marker
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+      marker.setAttribute('id', 'arrowhead');
+      marker.setAttribute('markerWidth', '10');
+      marker.setAttribute('markerHeight', '10');
+      marker.setAttribute('refX', '9');
+      marker.setAttribute('refY', '3');
+      marker.setAttribute('orient', 'auto');
+      const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+      polygon.setAttribute('points', '0 0, 10 3, 0 6');
+      polygon.setAttribute('fill', '#6b7280');
+      marker.appendChild(polygon);
+      defs.appendChild(marker);
+      svg.appendChild(defs);
+
+      return svg.outerHTML;
+    }
+
+    function selectStep(stepId) {
+      selectedStep = workflowSteps.find(s => s.id === stepId);
+      updatePropertiesPanel();
+      renderCanvas();
+    }
+
+    function updatePropertiesPanel() {
+      const workflowProps = document.getElementById('workflow-properties');
+      const stepProps = document.getElementById('step-properties');
+
+      if (!stepProps) return;
+
+      if (selectedStep) {
+        workflowProps?.classList.add('hidden');
+        stepProps.classList.remove('hidden');
+
+        // Populate step properties
+        document.getElementById('step-name').value = selectedStep.name || '';
+        document.getElementById('step-agent').value = selectedStep.agent || '';
+        document.getElementById('step-parallel').checked = selectedStep.parallel || false;
+        document.getElementById('step-optional').checked = selectedStep.optional || false;
+        document.getElementById('step-timeout').value = selectedStep.timeout || 300000;
+        document.getElementById('step-retry-attempts').value = selectedStep.retryPolicy?.maxAttempts || 3;
+        document.getElementById('step-retry-delay').value = selectedStep.retryPolicy?.delay || 1000;
+
+        // Update dependencies
+        updateDependenciesUI();
+      } else {
+        workflowProps?.classList.remove('hidden');
+        stepProps.classList.add('hidden');
+      }
+    }
+
+    function updateDependenciesUI() {
+      const depsContainer = document.getElementById('step-dependencies');
+      const addDepSelect = document.getElementById('add-dependency');
+
+      if (!depsContainer || !addDepSelect || !selectedStep) return;
+
+      // Clear existing
+      depsContainer.innerHTML = '';
+      addDepSelect.innerHTML = '<option value="">Add dependency...</option>';
+
+      // Show current dependencies
+      (selectedStep.dependsOn || []).forEach(depId => {
+        const depStep = workflowSteps.find(s => s.id === depId);
+        if (depStep) {
+          const depDiv = document.createElement('div');
+          depDiv.className = 'flex items-center justify-between px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-sm';
+          depDiv.innerHTML = `
+            <span>${depStep.name}</span>
+            <button onclick="removeDependency('${depId}')" class="text-red-600 hover:text-red-800">×</button>
+          `;
+          depsContainer.appendChild(depDiv);
+        }
+      });
+
+      // Populate add dependency dropdown
+      workflowSteps.forEach(step => {
+        if (step.id !== selectedStep.id && !(selectedStep.dependsOn || []).includes(step.id)) {
+          const option = document.createElement('option');
+          option.value = step.id;
+          option.textContent = step.name;
+          addDepSelect.appendChild(option);
+        }
+      });
+    }
+
+    function addDependency(stepId) {
+      if (!stepId || !selectedStep) return;
+
+      if (!selectedStep.dependsOn) {
+        selectedStep.dependsOn = [];
+      }
+
+      if (!selectedStep.dependsOn.includes(stepId)) {
+        selectedStep.dependsOn.push(stepId);
+        updateDependenciesUI();
+        renderCanvas();
+        validateWorkflow();
+      }
+
+      document.getElementById('add-dependency').value = '';
+    }
+
+    function removeDependency(stepId) {
+      if (!selectedStep || !selectedStep.dependsOn) return;
+
+      selectedStep.dependsOn = selectedStep.dependsOn.filter(id => id !== stepId);
+      updateDependenciesUI();
+      renderCanvas();
+      validateWorkflow();
+    }
+
+    function updateSelectedStep() {
+      if (!selectedStep) return;
+
+      selectedStep.name = document.getElementById('step-name').value;
+      selectedStep.agent = document.getElementById('step-agent').value;
+      selectedStep.parallel = document.getElementById('step-parallel').checked;
+      selectedStep.optional = document.getElementById('step-optional').checked;
+      selectedStep.timeout = parseInt(document.getElementById('step-timeout').value) || 300000;
+
+      if (!selectedStep.retryPolicy) {
+        selectedStep.retryPolicy = { maxAttempts: 3, delay: 1000, backoff: 'exponential' };
+      }
+      selectedStep.retryPolicy.maxAttempts = parseInt(document.getElementById('step-retry-attempts').value) || 3;
+      selectedStep.retryPolicy.delay = parseInt(document.getElementById('step-retry-delay').value) || 1000;
+
+      renderCanvas();
+      validateWorkflow();
+    }
+
+    function deleteSelectedStep() {
+      if (!selectedStep) return;
+
+      if (confirm(`Delete step "${selectedStep.name}"?`)) {
+        // Remove dependencies on this step
+        workflowSteps.forEach(step => {
+          if (step.dependsOn) {
+            step.dependsOn = step.dependsOn.filter(id => id !== selectedStep.id);
+          }
+        });
+
+        workflowSteps = workflowSteps.filter(s => s.id !== selectedStep.id);
+        selectedStep = null;
+        renderCanvas();
+        updatePropertiesPanel();
+        validateWorkflow();
+      }
+    }
+
+    // Zoom controls
+    function zoomIn() {
+      zoomLevel = Math.min(zoomLevel + 0.1, 2);
+      updateZoomDisplay();
+      renderCanvas();
+    }
+
+    function zoomOut() {
+      zoomLevel = Math.max(zoomLevel - 0.1, 0.5);
+      updateZoomDisplay();
+      renderCanvas();
+    }
+
+    function resetZoom() {
+      zoomLevel = 1;
+      panX = 0;
+      panY = 0;
+      updateZoomDisplay();
+      renderCanvas();
+    }
+
+    function updateZoomDisplay() {
+      const zoomDisplay = document.getElementById('zoom-level');
+      if (zoomDisplay) {
+        zoomDisplay.textContent = `${Math.round(zoomLevel * 100)}%`;
+      }
+    }
+
+    function autoLayout() {
+      if (workflowSteps.length === 0) return;
+
+      // Simple hierarchical layout
+      const levels = new Map();
+      const visited = new Set();
+
+      // Calculate levels based on dependencies
+      const calculateLevel = (stepId) => {
+        if (levels.has(stepId)) return levels.get(stepId);
+        if (visited.has(stepId)) return 0;
+
+        visited.add(stepId);
+        const step = workflowSteps.find(s => s.id === stepId);
+
+        if (!step || !step.dependsOn || step.dependsOn.length === 0) {
+          levels.set(stepId, 0);
+          return 0;
+        }
+
+        const maxDepLevel = Math.max(...step.dependsOn.map(calculateLevel));
+        const level = maxDepLevel + 1;
+        levels.set(stepId, level);
+        return level;
+      };
+
+      workflowSteps.forEach(step => calculateLevel(step.id));
+
+      // Group by level
+      const byLevel = new Map();
+      workflowSteps.forEach(step => {
+        const level = levels.get(step.id) || 0;
+        if (!byLevel.has(level)) {
+          byLevel.set(level, []);
+        }
+        byLevel.get(level).push(step);
+      });
+
+      // Position steps
+      const levelSpacing = 300;
+      const stepSpacing = 150;
+      const startX = 100;
+      const startY = 100;
+
+      byLevel.forEach((steps, level) => {
+        const yOffset = (steps.length - 1) * stepSpacing / 2;
+        steps.forEach((step, index) => {
+          step.x = startX + level * levelSpacing;
+          step.y = startY + index * stepSpacing - yOffset;
+        });
+      });
+
+      renderCanvas();
+      validateWorkflow();
+    }
+
+    function validateWorkflow() {
+      validationErrors = [];
+      validationWarnings = [];
+
+      const workflowName = document.getElementById('workflow-name')?.value;
+      if (!workflowName || workflowName.trim().length === 0) {
+        validationErrors.push('Workflow name is required');
+      }
+
+      if (workflowSteps.length === 0) {
+        validationErrors.push('Workflow must have at least one step');
+      }
+
+      // Check for duplicate step IDs
+      const stepIds = workflowSteps.map(s => s.id);
+      const duplicates = stepIds.filter((id, index) => stepIds.indexOf(id) !== index);
+      if (duplicates.length > 0) {
+        validationErrors.push(`Duplicate step IDs: ${[...new Set(duplicates)].join(', ')}`);
+      }
+
+      // Check for missing agents
+      workflowSteps.forEach(step => {
+        if (!step.agent || step.agent.trim().length === 0) {
+          validationErrors.push(`Step "${step.name || step.id}" missing agent`);
+        }
+      });
+
+      // Check for circular dependencies
+      const checkCircular = (stepId, visited = new Set(), path = new Set()) => {
+        if (path.has(stepId)) {
+          validationErrors.push(`Circular dependency detected involving step: ${stepId}`);
+          return true;
+        }
+        if (visited.has(stepId)) return false;
+
+        visited.add(stepId);
+        path.add(stepId);
+
+        const step = workflowSteps.find(s => s.id === stepId);
+        if (step && step.dependsOn) {
+          for (const dep of step.dependsOn) {
+            if (checkCircular(dep, visited, new Set(path))) {
+              return true;
+            }
+          }
+        }
+
+        path.delete(stepId);
+        return false;
+      };
+
+      workflowSteps.forEach(step => {
+        if (!validationErrors.some(e => e.includes('Circular dependency'))) {
+          checkCircular(step.id);
+        }
+      });
+
+      // Check for orphaned dependencies
+      const allStepIds = new Set(workflowSteps.map(s => s.id));
+      workflowSteps.forEach(step => {
+        if (step.dependsOn) {
+          step.dependsOn.forEach(depId => {
+            if (!allStepIds.has(depId)) {
+              validationErrors.push(`Step "${step.name || step.id}" depends on non-existent step: ${depId}`);
+            }
+          });
+        }
+      });
+
+      // Warnings
+      if (workflowSteps.length > 20) {
+        validationWarnings.push('Large workflow (>20 steps) may be difficult to manage');
+      }
+
+      const parallelSteps = workflowSteps.filter(s => s.parallel).length;
+      if (parallelSteps === workflowSteps.length && workflowSteps.length > 1) {
+        validationWarnings.push('All steps are parallel - consider sequential dependencies');
+      }
+
+      // Update validation status display
+      updateValidationDisplay();
+    }
+
+    function updateValidationDisplay() {
+      const statusEl = document.getElementById('validation-status');
+      if (!statusEl) return;
+
+      if (validationErrors.length > 0) {
+        statusEl.innerHTML = `
+          <span class="text-red-600 dark:text-red-400">
+            ❌ ${validationErrors.length} error(s)
+          </span>
+        `;
+        statusEl.title = validationErrors.join('\n');
+      } else if (validationWarnings.length > 0) {
+        statusEl.innerHTML = `
+          <span class="text-yellow-600 dark:text-yellow-400">
+            ⚠️ ${validationWarnings.length} warning(s)
+          </span>
+        `;
+        statusEl.title = validationWarnings.join('\n');
+      } else {
+        statusEl.innerHTML = `
+          <span class="text-green-600 dark:text-green-400">
+            ✅ Valid
+          </span>
+        `;
+        statusEl.title = 'Workflow is valid';
+      }
+    }
+
+    async function saveWorkflow() {
+      // Validate before saving
+      validateWorkflow();
+
+      if (validationErrors.length > 0) {
+        alert(`Cannot save workflow with errors:\n\n${validationErrors.join('\n')}`);
+        return;
+      }
+
+      const workflowName = document.getElementById('workflow-name')?.value || 'Untitled Workflow';
+      const workflowDescription = document.getElementById('workflow-description')?.value || '';
+      const maxConcurrent = parseInt(document.getElementById('max-concurrent')?.value || '3');
+
+      const workflow = {
+        id: currentWorkflowId || `workflow-${Date.now()}`,
+        name: workflowName,
+        description: workflowDescription,
+        version: '1.0.0',
+        steps: workflowSteps.map(step => ({
+          id: step.id,
+          name: step.name,
+          agent: step.agent,
+          task: {
+            id: `task-${step.id}`,
+            type: 'custom',
+            title: step.name,
+            description: '',
+            parameters: {},
+            context: {},
+            priority: 'medium',
+            dependencies: [],
+            status: 'pending',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          dependsOn: step.dependsOn || [],
+          parallel: step.parallel || false,
+          optional: step.optional || false,
+          retryPolicy: step.retryPolicy || {
+            maxAttempts: 3,
+            delay: 1000,
+            backoff: 'exponential',
+          },
+          timeout: step.timeout || 300000,
+        })),
+        config: {
+          maxConcurrent,
+          failFast: false,
+          saveState: true,
+          notifications: false,
+        },
+        status: 'draft',
+      };
+
+      try {
+        const method = currentWorkflowId ? 'PUT' : 'POST';
+        const url = currentWorkflowId
+          ? `${API_BASE}/workflows/${currentWorkflowId}`
+          : `${API_BASE}/workflows`;
+
+        const response = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(workflow),
+        });
+
+        if (response.ok) {
+          const savedWorkflow = await response.json();
+          currentWorkflowId = savedWorkflow.id;
+          alert('Workflow saved successfully!');
+        } else {
+          const error = await response.json();
+          alert(`Failed to save workflow: ${error.error}`);
+        }
+      } catch (error) {
+        console.error('Error saving workflow:', error);
+        alert('Failed to save workflow. Check console for details.');
+      }
+    }
+
+    async function executeWorkflow() {
+      if (!currentWorkflowId) {
+        alert('Please save the workflow first');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/workflows/${currentWorkflowId}/execute`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          alert(`Workflow execution started! Execution ID: ${result.executionId || 'N/A'}`);
+          // Navigate to debugger with execution ID
+          if (result.executionId) {
+            window.location.href = `/workflow-debugger?executionId=${result.executionId}`;
+          }
+        } else {
+          const error = await response.json();
+          alert(`Failed to execute workflow: ${error.error}\n\n${error.suggestion || ''}`);
+        }
+      } catch (error) {
+        console.error('Error executing workflow:', error);
+        alert('Failed to execute workflow. Check console for details.');
+      }
+    }
+
+    async function exportWorkflow(format = 'json') {
+      if (!currentWorkflowId) {
+        alert('Please save the workflow first');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/workflows/${currentWorkflowId}/export?format=${format}`);
+
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${currentWorkflowId}.${format}`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } else {
+          const error = await response.json();
+          alert(`Failed to export workflow: ${error.error}\n\n${error.suggestion || ''}`);
+        }
+      } catch (error) {
+        console.error('Error exporting workflow:', error);
+        alert('Failed to export workflow. Check console for details.');
+      }
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      // Ctrl/Cmd + S: Save
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        saveWorkflow();
+      }
+      // Ctrl/Cmd + E: Execute
+      if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+        e.preventDefault();
+        executeWorkflow();
+      }
+      // Ctrl/Cmd + Shift + E: Export JSON
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'E') {
+        e.preventDefault();
+        exportWorkflow('json');
+      }
+      // Ctrl/Cmd + Shift + Y: Export YAML
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'Y') {
+        e.preventDefault();
+        exportWorkflow('yaml');
+      }
+      // Delete: Remove selected step
+      if (e.key === 'Delete' && selectedStep) {
+        deleteSelectedStep();
+      }
+      // Zoom controls
+      if ((e.ctrlKey || e.metaKey) && e.key === '=') {
+        e.preventDefault();
+        zoomIn();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === '-') {
+        e.preventDefault();
+        zoomOut();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === '0') {
+        e.preventDefault();
+        resetZoom();
+      }
+      // Escape: Deselect step
+      if (e.key === 'Escape') {
+        selectedStep = null;
+        updatePropertiesPanel();
+        renderCanvas();
+      }
+    });
+
+    // Validate on load
+    validateWorkflow();
+
+    // Load workflows on page load
+    loadWorkflows();
+  </script>
+</DocLayout>
+

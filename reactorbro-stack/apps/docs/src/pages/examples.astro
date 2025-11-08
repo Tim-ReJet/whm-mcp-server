@@ -1,0 +1,142 @@
+---
+import DocLayout from '../layouts/DocLayout.astro';
+---
+
+<DocLayout title="Interactive Examples">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-4xl font-bold mb-8">Interactive Examples</h1>
+
+    <div class="space-y-12">
+      <!-- Site Creation Example -->
+      <section class="border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+        <h2 class="text-2xl font-semibold mb-4">Site Creation</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
+          Try creating a site interactively:
+        </p>
+
+        <div id="site-creation-example" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-2">Site ID</label>
+            <input
+              type="text"
+              id="site-id-input"
+              placeholder="my-new-site"
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+            />
+          </div>
+          <button
+            onclick="createSiteExample()"
+            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Create Site
+          </button>
+          <div id="site-result" class="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg hidden">
+            <pre id="site-output" class="text-sm"></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Asset Search Example -->
+      <section class="border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+        <h2 class="text-2xl font-semibold mb-4">Asset Search</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
+          Search for assets:
+        </p>
+
+        <div id="asset-search-example" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-2">Search Query</label>
+            <input
+              type="text"
+              id="asset-query-input"
+              placeholder="button"
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+            />
+          </div>
+          <button
+            onclick="searchAssetsExample()"
+            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Search
+          </button>
+          <div id="asset-results" class="mt-4 space-y-2"></div>
+        </div>
+      </section>
+
+      <!-- Code Example -->
+      <section class="border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+        <h2 class="text-2xl font-semibold mb-4">Code Example</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
+          Try this code example:
+        </p>
+
+        <div class="bg-gray-900 rounded-lg p-4 mb-4">
+          <pre class="text-sm text-gray-100"><code id="code-example">import { SiteManager } from '@repo/scripts';
+
+const manager = new SiteManager();
+manager.create('my-site');
+manager.use('my-site');
+manager.dev();</code></pre>
+        </div>
+        <button
+          onclick="copyCodeExample()"
+          class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+        >
+          Copy Code
+        </button>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    function createSiteExample() {
+      const siteId = document.getElementById('site-id-input')?.value;
+      const resultDiv = document.getElementById('site-result');
+      const output = document.getElementById('site-output');
+
+      if (!siteId) {
+        alert('Please enter a site ID');
+        return;
+      }
+
+      if (resultDiv && output) {
+        resultDiv.classList.remove('hidden');
+        output.textContent = `Creating site: ${siteId}\n\nCommand: pnpm site:create ${siteId}\n\n✅ Site would be created with:\n- ID: ${siteId}\n- Config: sites/${siteId}/site.config.json\n- Status: development`;
+      }
+    }
+
+    function searchAssetsExample() {
+      const query = document.getElementById('asset-query-input')?.value;
+      const resultsDiv = document.getElementById('asset-results');
+
+      if (!query) {
+        alert('Please enter a search query');
+        return;
+      }
+
+      if (resultsDiv) {
+        resultsDiv.innerHTML = `
+          <div class="p-4 border border-gray-200 dark:border-gray-800 rounded-lg">
+            <h3 class="font-semibold mb-2">Button Primary</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Primary button component with hover states</p>
+            <p class="text-xs text-gray-500 mt-2">Category: ui-components | Rating: 4.7/5</p>
+          </div>
+          <div class="p-4 border border-gray-200 dark:border-gray-800 rounded-lg">
+            <h3 class="font-semibold mb-2">Card Component</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Reusable card component with header and footer</p>
+            <p class="text-xs text-gray-500 mt-2">Category: ui-components | Rating: 4.6/5</p>
+          </div>
+        `;
+      }
+    }
+
+    function copyCodeExample() {
+      const code = document.getElementById('code-example')?.textContent;
+      if (code) {
+        navigator.clipboard.writeText(code);
+        alert('Code copied to clipboard!');
+      }
+    }
+  </script>
+</DocLayout>
+

@@ -1,0 +1,46 @@
+# robots.txt for ReactorJet Stack
+# Production-ready configuration
+
+# Allow all search engines by default
+User-agent: *
+Allow: /
+
+# Disallow admin and sensitive areas
+Disallow: /admin
+Disallow: /api/
+Disallow: /_astro/
+Disallow: /private/
+
+# Disallow search result pages (if you add search)
+Disallow: /search?
+Disallow: /*?search=
+
+# Disallow URL parameters that don't change content
+Disallow: /*?utm_source=
+Disallow: /*?utm_medium=
+Disallow: /*?utm_campaign=
+Disallow: /*?ref=
+
+# Allow CSS and JS for proper rendering
+User-agent: Googlebot
+Allow: /*.css
+Allow: /*.js
+
+# Sitemap location
+# Update this URL with your production domain
+Sitemap: https://your-domain.com/sitemap-index.xml
+Sitemap: https://your-domain.com/sitemap-0.xml
+
+# Crawl delay (optional, uncomment if needed)
+# Crawl-delay: 1
+
+# Specific bot rules (optional)
+# User-agent: Bingbot
+# Crawl-delay: 1
+
+# Block bad bots (optional, uncomment if needed)
+# User-agent: BadBot
+# Disallow: /
+
+# User-agent: SemrushBot
+# Disallow: /

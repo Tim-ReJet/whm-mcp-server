@@ -1,0 +1,69 @@
+---
+import DocLayout from '../layouts/DocLayout.astro';
+import { getCollection } from 'astro:content';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+
+const docs = await getCollection('docs');
+const sortedDocs = docs.sort((a, b) => (a.data.order || 999) - (b.data.order || 999));
+---
+
+<DocLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+  <div class="max-w-4xl mx-auto px-4 py-12">
+    <div class="text-center mb-12">
+      <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        ReactorBro Stack
+      </h1>
+      <p class="text-xl text-gray-600 dark:text-gray-300">
+        Comprehensive documentation for the ReactorBro Stack
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6 mb-12">
+      <a href="/docs/getting-started" class="p-6 border border-gray-200 dark:border-gray-800 rounded-lg hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
+        <h2 class="text-2xl font-semibold mb-2">🚀 Getting Started</h2>
+        <p class="text-gray-600 dark:text-gray-400">Quick start guide and setup instructions</p>
+      </a>
+
+      <a href="/docs/architecture" class="p-6 border border-gray-200 dark:border-gray-800 rounded-lg hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
+        <h2 class="text-2xl font-semibold mb-2">🏗️ Architecture</h2>
+        <p class="text-gray-600 dark:text-gray-400">System architecture and design patterns</p>
+      </a>
+
+      <a href="/docs/guides" class="p-6 border border-gray-200 dark:border-gray-800 rounded-lg hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
+        <h2 class="text-2xl font-semibold mb-2">📚 Guides</h2>
+        <p class="text-gray-600 dark:text-gray-400">Step-by-step guides and tutorials</p>
+      </a>
+
+      <a href="/docs/api" class="p-6 border border-gray-200 dark:border-gray-800 rounded-lg hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
+        <h2 class="text-2xl font-semibold mb-2">🔌 API Reference</h2>
+        <p class="text-gray-600 dark:text-gray-400">Complete API documentation</p>
+      </a>
+
+      <a href="/docs/troubleshooting" class="p-6 border border-gray-200 dark:border-gray-800 rounded-lg hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
+        <h2 class="text-2xl font-semibold mb-2">🔧 Troubleshooting</h2>
+        <p class="text-gray-600 dark:text-gray-400">Common issues and solutions</p>
+      </a>
+
+      <a href="/docs/workflow-examples" class="p-6 border border-gray-200 dark:border-gray-800 rounded-lg hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
+        <h2 class="text-2xl font-semibold mb-2">📋 Workflow Examples</h2>
+        <p class="text-gray-600 dark:text-gray-400">Real-world workflow patterns</p>
+      </a>
+    </div>
+
+    <div class="mt-12">
+      <h2 class="text-3xl font-bold mb-6">All Documentation</h2>
+      <div class="space-y-4">
+        {sortedDocs.map((doc) => (
+          <a
+            href={`/docs/${doc.slug}`}
+            class="block p-4 border border-gray-200 dark:border-gray-800 rounded-lg hover:border-blue-500 dark:hover:border-blue-500 transition-colors"
+          >
+            <h3 class="text-xl font-semibold mb-2">{doc.data.title}</h3>
+            <p class="text-gray-600 dark:text-gray-400">{doc.data.description || ''}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</DocLayout>
+

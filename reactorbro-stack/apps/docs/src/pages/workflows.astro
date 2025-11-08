@@ -1,0 +1,255 @@
+---
+import DocLayout from '../layouts/DocLayout.astro';
+import { WorkflowVisualizer } from '../../../../packages/scripts/src/workflow-visualizer.js';
+
+// Sample workflow for demonstration
+const sampleWorkflow = {
+  id: 'sample-workflow',
+  name: 'Sample Workflow',
+  description: 'A sample workflow for visualization',
+  version: '1.0.0',
+  steps: [
+    {
+      id: 'step-1',
+      name: 'Initialize',
+      agent: 'design-agent',
+      task: { id: 'task-1', type: 'custom', title: 'Initialize', description: '', parameters: {}, context: {}, priority: 'medium', dependencies: [], status: 'pending', createdAt: new Date(), updatedAt: new Date() },
+      dependsOn: [],
+      parallel: false,
+      optional: false,
+      retryPolicy: { maxAttempts: 3, delay: 1000, backoff: 'exponential' },
+    },
+    {
+      id: 'step-2',
+      name: 'Process Data',
+      agent: 'content-agent',
+      task: { id: 'task-2', type: 'custom', title: 'Process Data', description: '', parameters: {}, context: {}, priority: 'medium', dependencies: [], status: 'pending', createdAt: new Date(), updatedAt: new Date() },
+      dependsOn: ['step-1'],
+      parallel: false,
+      optional: false,
+      retryPolicy: { maxAttempts: 3, delay: 1000, backoff: 'exponential' },
+    },
+    {
+      id: 'step-3',
+      name: 'Generate Output',
+      agent: 'seo-agent',
+      task: { id: 'task-3', type: 'custom', title: 'Generate Output', description: '', parameters: {}, context: {}, priority: 'medium', dependencies: [], status: 'pending', createdAt: new Date(), updatedAt: new Date() },
+      dependsOn: ['step-2'],
+      parallel: false,
+      optional: false,
+      retryPolicy: { maxAttempts: 3, delay: 1000, backoff: 'exponential' },
+    },
+  ],
+  config: {
+    maxConcurrent: 3,
+    failFast: false,
+    saveState: true,
+    notifications: false,
+  },
+  status: 'draft',
+};
+
+const graph = WorkflowVisualizer.workflowToGraph(sampleWorkflow);
+const stats = WorkflowVisualizer.getWorkflowStats(sampleWorkflow);
+const validation = WorkflowVisualizer.validateWorkflow(sampleWorkflow);
+---
+
+<DocLayout title="Workflow Visualization">
+  <div class="max-w-7xl mx-auto">
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold mb-4">Workflow Visualization</h1>
+      <p class="text-gray-600 dark:text-gray-400">
+        Visualize and debug agent workflows
+      </p>
+    </div>
+
+    <!-- Workflow Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class="p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Total Steps</h3>
+        <p class="text-3xl font-bold">{stats.totalSteps}</p>
+      </div>
+      <div class="p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Parallel Steps</h3>
+        <p class="text-3xl font-bold text-blue-600">{stats.parallelSteps}</p>
+      </div>
+      <div class="p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Max Depth</h3>
+        <p class="text-3xl font-bold">{stats.maxDepth}</p>
+      </div>
+      <div class="p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Est. Duration</h3>
+        <p class="text-3xl font-bold">{(stats.estimatedDuration / 60000).toFixed(1)}m</p>
+      </div>
+    </div>
+
+    <!-- Validation Status -->
+    {validation.errors.length > 0 || validation.warnings.length > 0 ? (
+      <div class="mb-8 space-y-4">
+        {validation.errors.length > 0 && (
+          <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <h3 class="font-semibold text-red-800 dark:text-red-200 mb-2">Errors</h3>
+            <ul class="list-disc list-inside text-sm text-red-700 dark:text-red-300">
+              {validation.errors.map((error) => (
+                <li>{error}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {validation.warnings.length > 0 && (
+          <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+            <h3 class="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">Warnings</h3>
+            <ul class="list-disc list-inside text-sm text-yellow-700 dark:text-yellow-300">
+              {validation.warnings.map((warning) => (
+                <li>{warning}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    ) : (
+      <div class="mb-8 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+        <p class="text-green-800 dark:text-green-200">✅ Workflow is valid</p>
+      </div>
+    )}
+
+    <!-- Workflow Graph Visualization -->
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Workflow Graph</h2>
+      <div id="workflow-canvas" class="border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900" style="min-height: 600px; position: relative; overflow: auto;">
+        <svg id="workflow-svg" width="100%" height="600" style="min-width: 1000px;">
+          <!-- Edges -->
+          {graph.edges.map((edge) => {
+            const sourceNode = graph.nodes.find(n => n.id === edge.source);
+            const targetNode = graph.nodes.find(n => n.id === edge.target);
+            if (!sourceNode || !targetNode || sourceNode.x === undefined || sourceNode.y === undefined || targetNode.x === undefined || targetNode.y === undefined) return null;
+
+            const x1 = sourceNode.x + (sourceNode.width || 200) / 2;
+            const y1 = sourceNode.y + (sourceNode.height || 100) / 2;
+            const x2 = targetNode.x + (targetNode.width || 200) / 2;
+            const y2 = targetNode.y + (targetNode.height || 100) / 2;
+
+            return (
+              <line
+                x1={x1}
+                y1={y1}
+                x2={x2}
+                y2={y2}
+                stroke={edge.type === 'parallel' ? '#3B82F6' : '#6B7280'}
+                stroke-width="2"
+                marker-end="url(#arrowhead)"
+                class={edge.type === 'parallel' ? 'stroke-blue-500' : 'stroke-gray-500'}
+              />
+            );
+          })}
+
+          <!-- Arrow marker -->
+          <defs>
+            <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+              <polygon points="0 0, 10 3, 0 6" fill="#6B7280" />
+            </marker>
+          </defs>
+
+          <!-- Nodes -->
+          {graph.nodes.map((node) => {
+            if (node.x === undefined || node.y === undefined) return null;
+
+            const statusColor =
+              node.status === 'completed'
+                ? 'bg-green-500'
+                : node.status === 'running'
+                  ? 'bg-blue-500'
+                  : node.status === 'failed'
+                    ? 'bg-red-500'
+                    : 'bg-gray-400';
+
+            return (
+              <g>
+                <rect
+                  x={node.x}
+                  y={node.y}
+                  width={node.width || 200}
+                  height={node.height || 100}
+                  rx="8"
+                  class={`${statusColor} fill-opacity-20 stroke-2`}
+                  stroke={statusColor.replace('bg-', 'stroke-')}
+                />
+                <text
+                  x={node.x + (node.width || 200) / 2}
+                  y={node.y + 30}
+                  text-anchor="middle"
+                  class="font-semibold fill-gray-900 dark:fill-gray-100"
+                  font-size="14"
+                >
+                  {node.label}
+                </text>
+                {node.agent && (
+                  <text
+                    x={node.x + (node.width || 200) / 2}
+                    y={node.y + 50}
+                    text-anchor="middle"
+                    class="fill-gray-600 dark:fill-gray-400"
+                    font-size="12"
+                  >
+                    {node.agent}
+                  </text>
+                )}
+                {node.status && (
+                  <text
+                    x={node.x + (node.width || 200) / 2}
+                    y={node.y + 70}
+                    text-anchor="middle"
+                    class="fill-gray-500 dark:fill-gray-500"
+                    font-size="10"
+                  >
+                    {node.status}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+    </div>
+
+    <!-- Workflow Details -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Workflow Information</h2>
+        <dl class="space-y-2">
+          <div>
+            <dt class="font-semibold">ID</dt>
+            <dd class="text-gray-600 dark:text-gray-400">{sampleWorkflow.id}</dd>
+          </div>
+          <div>
+            <dt class="font-semibold">Name</dt>
+            <dd class="text-gray-600 dark:text-gray-400">{sampleWorkflow.name}</dd>
+          </div>
+          <div>
+            <dt class="font-semibold">Version</dt>
+            <dd class="text-gray-600 dark:text-gray-400">{sampleWorkflow.version}</dd>
+          </div>
+          <div>
+            <dt class="font-semibold">Status</dt>
+            <dd class="text-gray-600 dark:text-gray-400">{sampleWorkflow.status}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Steps</h2>
+        <div class="space-y-3">
+          {sampleWorkflow.steps.map((step) => (
+            <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded">
+              <div class="font-semibold">{step.name}</div>
+              <div class="text-sm text-gray-600 dark:text-gray-400">
+                Agent: {step.agent} | Dependencies: {step.dependsOn.length > 0 ? step.dependsOn.join(', ') : 'None'}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</DocLayout>
+

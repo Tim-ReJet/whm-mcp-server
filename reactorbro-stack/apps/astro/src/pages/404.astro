@@ -1,0 +1,102 @@
+---
+import '../styles.css';
+
+const links = [
+  { href: '/', label: 'Home', icon: '🏠' },
+  { href: '/about', label: 'About', icon: 'ℹ️' },
+  { href: '/blog', label: 'Blog', icon: '📝' },
+  { href: '/contact', label: 'Contact', icon: '📧' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>404 - Page Not Found | ReactorJet Stack</title>
+    <meta name="description" content="The page you're looking for doesn't exist." />
+  </head>
+  <body class="min-h-screen bg-neutral-50 text-neutral-900 flex items-center justify-center">
+    <main class="container-responsive py-12">
+      <div class="max-w-2xl mx-auto text-center space-y-8 animate-fade-in">
+        <!-- Error Code -->
+        <div class="space-y-4">
+          <h1 class="text-9xl font-bold text-primary-600 tracking-tight">
+            404
+          </h1>
+          <div class="inline-block">
+            <span class="badge bg-primary-100 text-primary-800 text-lg px-6 py-2">
+              Page Not Found
+            </span>
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        <div class="space-y-4">
+          <h2 class="text-3xl font-bold text-neutral-900">
+            Oops! This page doesn't exist
+          </h2>
+          <p class="text-lg text-neutral-600 max-w-xl mx-auto">
+            The page you're looking for might have been moved, deleted, or never existed in the first place.
+          </p>
+          <div class="text-sm text-neutral-500 font-mono bg-neutral-100 rounded px-4 py-2 inline-block">
+            {currentPath}
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-wrap gap-4 justify-center pt-4">
+          <a href="/" class="btn btn-primary">
+            ← Back to Home
+          </a>
+          <button
+            onclick="window.history.back()"
+            class="btn btn-outline border-neutral-300 text-neutral-900 hover:bg-neutral-100"
+          >
+            Go Back
+          </button>
+        </div>
+
+        <!-- Helpful Links -->
+        <div class="pt-8">
+          <p class="text-sm text-neutral-600 mb-4 font-semibold">
+            Here are some helpful links instead:
+          </p>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {links.map((link) => (
+              <a
+                href={link.href}
+                class="card text-center hover:scale-105 transition-transform duration-200 p-4"
+              >
+                <div class="text-3xl mb-2">{link.icon}</div>
+                <div class="text-sm font-medium text-neutral-900">
+                  {link.label}
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        <!-- Additional Help -->
+        <div class="pt-8 border-t border-neutral-200">
+          <p class="text-sm text-neutral-600">
+            Still can't find what you're looking for?
+            <a href="/contact" class="link text-primary-600">
+              Contact us
+            </a>
+            for assistance.
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Decorative Background Elements -->
+    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none" aria-hidden="true">
+      <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-100 rounded-full opacity-20 blur-3xl"></div>
+      <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-500 rounded-full opacity-10 blur-3xl"></div>
+    </div>
+  </body>
+</html>

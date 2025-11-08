@@ -1,0 +1,314 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ReactorBro Stack Site Configuration",
+  "description": "Configuration schema for managing multiple sites in the ReactorBro Stack",
+  "type": "object",
+  "required": ["name", "id", "domain", "wordpress"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Human-readable site name",
+      "examples": ["Berg Projects", "My Company"]
+    },
+    "id": {
+      "type": "string",
+      "description": "Unique site identifier (slug)",
+      "pattern": "^[a-z0-9-]+$",
+      "examples": ["berg-projects", "my-company"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief description of the site"
+    },
+    "domain": {
+      "type": "object",
+      "required": ["production"],
+      "properties": {
+        "production": {
+          "type": "string",
+          "format": "uri",
+          "description": "Production domain URL",
+          "examples": ["https://bergprojects.co.za"]
+        },
+        "staging": {
+          "type": "string",
+          "format": "uri",
+          "description": "Staging domain URL"
+        },
+        "preview": {
+          "type": "string",
+          "format": "uri",
+          "description": "Preview/development domain URL"
+        }
+      }
+    },
+    "wordpress": {
+      "type": "object",
+      "required": ["url"],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "WordPress backend URL",
+          "examples": ["https://bergprojects.co.za", "https://reactorjet.ddev.site"]
+        },
+        "restApi": {
+          "type": "string",
+          "format": "uri",
+          "description": "WordPress REST API endpoint"
+        },
+        "graphql": {
+          "type": "string",
+          "format": "uri",
+          "description": "WPGraphQL endpoint"
+        },
+        "local": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Whether local WordPress is available",
+              "default": false
+            },
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "description": "Local WordPress URL (DDEV)"
+            },
+            "adminUser": {
+              "type": "string",
+              "description": "Local admin username"
+            },
+            "adminPassword": {
+              "type": "string",
+              "description": "Local admin password"
+            }
+          }
+        }
+      }
+    },
+    "astro": {
+      "type": "object",
+      "properties": {
+        "port": {
+          "type": "integer",
+          "description": "Development server port",
+          "minimum": 1024,
+          "maximum": 65535,
+          "default": 4321
+        },
+        "output": {
+          "type": "string",
+          "enum": ["static", "server", "hybrid"],
+          "description": "Astro output mode",
+          "default": "static"
+        },
+        "adapter": {
+          "type": "string",
+          "enum": ["cloudflare", "vercel", "netlify", "node", "none"],
+          "description": "Deployment adapter",
+          "default": "cloudflare"
+        },
+        "srcDir": {
+          "type": "string",
+          "description": "Custom source directory relative to apps/astro",
+          "default": "src"
+        }
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "properties": {
+        "platform": {
+          "type": "string",
+          "enum": ["cloudflare-pages", "vercel", "netlify", "custom"],
+          "description": "Deployment platform"
+        },
+        "projectId": {
+          "type": "string",
+          "description": "Platform-specific project ID"
+        },
+        "branch": {
+          "type": "object",
+          "properties": {
+            "production": {
+              "type": "string",
+              "description": "Production branch name",
+              "default": "main"
+            },
+            "preview": {
+              "type": "string",
+              "description": "Preview branch pattern"
+            }
+          }
+        },
+        "buildCommand": {
+          "type": "string",
+          "description": "Custom build command"
+        },
+        "outputDir": {
+          "type": "string",
+          "description": "Build output directory",
+          "default": "dist"
+        }
+      }
+    },
+    "seo": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Default site title"
+        },
+        "description": {
+          "type": "string",
+          "description": "Default site description"
+        },
+        "image": {
+          "type": "string",
+          "format": "uri",
+          "description": "Default OG image URL"
+        },
+        "locale": {
+          "type": "string",
+          "description": "Site locale",
+          "default": "en-US"
+        },
+        "twitter": {
+          "type": "string",
+          "description": "Twitter handle"
+        }
+      }
+    },
+    "features": {
+      "type": "object",
+      "properties": {
+        "blog": {
+          "type": "boolean",
+          "description": "Enable blog functionality",
+          "default": true
+        },
+        "ecommerce": {
+          "type": "boolean",
+          "description": "Enable e-commerce features",
+          "default": false
+        },
+        "multilingual": {
+          "type": "boolean",
+          "description": "Enable multi-language support",
+          "default": false
+        },
+        "search": {
+          "type": "boolean",
+          "description": "Enable search functionality",
+          "default": false
+        },
+        "comments": {
+          "type": "boolean",
+          "description": "Enable comments",
+          "default": false
+        }
+      }
+    },
+    "contact": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Primary contact email"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Primary contact phone"
+        },
+        "address": {
+          "type": "string",
+          "description": "Physical address"
+        },
+        "socialMedia": {
+          "type": "object",
+          "properties": {
+            "facebook": {
+              "type": "string"
+            },
+            "twitter": {
+              "type": "string"
+            },
+            "linkedin": {
+              "type": "string"
+            },
+            "instagram": {
+              "type": "string"
+            },
+            "youtube": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "analytics": {
+      "type": "object",
+      "properties": {
+        "googleAnalytics": {
+          "type": "string",
+          "description": "Google Analytics tracking ID"
+        },
+        "googleTagManager": {
+          "type": "string",
+          "description": "Google Tag Manager ID"
+        },
+        "plausible": {
+          "type": "string",
+          "description": "Plausible domain"
+        },
+        "fathom": {
+          "type": "string",
+          "description": "Fathom site ID"
+        }
+      }
+    },
+    "theme": {
+      "type": "object",
+      "properties": {
+        "primaryColor": {
+          "type": "string",
+          "description": "Primary brand color",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "fontFamily": {
+          "type": "string",
+          "description": "Primary font family"
+        },
+        "logo": {
+          "type": "string",
+          "description": "Path to logo file"
+        }
+      }
+    },
+    "env": {
+      "type": "object",
+      "description": "Environment-specific variables",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "development", "staging", "archived"],
+      "description": "Current site status",
+      "default": "development"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Site creation date"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update date"
+    }
+  }
+}

@@ -1,0 +1,360 @@
+# Page Design Workflow
+# Coordinates agents to design complete pages from concept to final output
+
+name: page-design-workflow
+version: 1.0.0
+description: Complete page design workflow from concept to implementation
+category: design
+
+# Workflow configuration
+config:
+  maxConcurrent: 3
+  failFast: false
+  saveState: true
+  notifications: true
+  timeout: 600000  # 10 minutes
+
+# Input parameters required for workflow
+inputs:
+  - name: pageType
+    type: string
+    required: true
+    description: Type of page to design
+    enum:
+      - landing
+      - blog
+      - product
+      - about
+      - contact
+      - custom
+
+  - name: brandInfo
+    type: object
+    required: true
+    description: Brand information for design consistency
+    properties:
+      name: string
+      industry: string
+      values: array
+      targetAudience: string
+      style: string
+
+  - name: contentRequirements
+    type: object
+    required: true
+    description: Content requirements and goals
+    properties:
+      purpose: string
+      tone: string
+      keywords: array
+      length: string
+
+  - name: designPreferences
+    type: object
+    required: false
+    description: Optional design preferences
+    properties:
+      colorPalette: string
+      typography: string
+      layoutStyle: string
+
+# Workflow steps
+steps:
+  # Step 1: Brand Identity Setup
+  - id: brand-identity
+    name: Create Brand Identity
+    agent: graphic-design-agent
+    description: Generate brand identity including colors and typography
+    taskType: brand_identity
+    dependsOn: []
+    parallel: false
+    optional: false
+    timeout: 180000
+    retryPolicy:
+      maxAttempts: 3
+      delay: 1000
+      backoff: exponential
+    inputs:
+      brandInfo: ${workflow.inputs.brandInfo}
+    outputs:
+      - name: brandIdentity
+        path: data.brand
+      - name: colorPalette
+        path: data.colors
+      - name: typography
+        path: data.typography
+      - name: logo
+        path: data.logo
+    onSuccess:
+      - log: Brand identity created successfully
+      - saveToContext: brandIdentity
+    onFailure:
+      - log: Failed to create brand identity
+      - notify: design-team
+
+  # Step 2: Page Layout Design
+  - id: layout-design
+    name: Design Page Layout
+    agent: layout-agent
+    description: Create responsive page layout with grid system
+    taskType: page_layout
+    dependsOn:
+      - brand-identity
+    parallel: false
+    optional: false
+    timeout: 180000
+    retryPolicy:
+      maxAttempts: 3
+      delay: 1000
+      backoff: exponential
+    inputs:
+      pageType: ${workflow.inputs.pageType}
+      requirements:
+        pageType: ${workflow.inputs.pageType}
+        contentComplexity: moderate
+        deviceTargets:
+          - mobile
+          - tablet
+          - desktop
+        designStyle: ${workflow.inputs.brandInfo.style}
+    outputs:
+      - name: layout
+        path: data
+      - name: gridSystem
+        path: data.grid
+      - name: sections
+        path: data.sections
+      - name: responsive
+        path: data.responsive
+    onSuccess:
+      - log: Page layout designed successfully
+      - saveToContext: pageLayout
+    onFailure:
+      - log: Failed to design page layout
+      - notify: design-team
+
+  # Step 3: Content Generation
+  - id: content-generation
+    name: Generate Page Content
+    agent: content-generation-agent
+    description: Create compelling content for the page
+    taskType: page_content
+    dependsOn:
+      - layout-design
+    parallel: false
+    optional: false
+    timeout: 180000
+    retryPolicy:
+      maxAttempts: 3
+      delay: 1000
+      backoff: exponential
+    inputs:
+      request:
+        pageType: ${workflow.inputs.pageType}
+        purpose: ${workflow.inputs.contentRequirements.purpose}
+        targetAudience: ${workflow.inputs.brandInfo.targetAudience}
+        tone: ${workflow.inputs.contentRequirements.tone}
+        length: ${workflow.inputs.contentRequirements.length}
+        keywords: ${workflow.inputs.contentRequirements.keywords}
+        brandVoice:
+          personality: ${workflow.inputs.brandInfo.values}
+    outputs:
+      - name: content
+        path: data
+      - name: headline
+        path: data.headline
+      - name: body
+        path: data.body
+      - name: cta
+        path: data.cta
+    onSuccess:
+      - log: Page content generated successfully
+      - saveToContext: pageContent
+    onFailure:
+      - log: Failed to generate page content
+      - notify: content-team
+
+  # Step 4: SEO Optimization
+  - id: seo-optimization
+    name: Optimize Content for SEO
+    agent: seo-optimization-agent
+    description: Optimize content and generate meta tags
+    taskType: content_optimization
+    dependsOn:
+      - content-generation
+    parallel: false
+    optional: false
+    timeout: 180000
+    retryPolicy:
+      maxAttempts: 3
+      delay: 1000
+      backoff: exponential
+    inputs:
+      content: ${steps.content-generation.outputs.content}
+      keywords: ${workflow.inputs.contentRequirements.keywords}
+    outputs:
+      - name: optimizedContent
+        path: data.optimized
+      - name: seoChanges
+        path: data.changes
+      - name: seoMetrics
+        path: data.metadata
+    onSuccess:
+      - log: Content optimized for SEO
+      - saveToContext: optimizedContent
+    onFailure:
+      - log: SEO optimization failed
+      - notify: seo-team
+      - continue: true  # Non-critical, continue workflow
+
+  # Step 5: Meta Tag Generation (parallel with optimization)
+  - id: meta-tags
+    name: Generate Meta Tags
+    agent: seo-optimization-agent
+    description: Create comprehensive meta tags for the page
+    taskType: meta_tag_generation
+    dependsOn:
+      - content-generation
+    parallel: true
+    optional: false
+    timeout: 60000
+    retryPolicy:
+      maxAttempts: 2
+      delay: 500
+      backoff: linear
+    inputs:
+      page:
+        type: ${workflow.inputs.pageType}
+        title: ${steps.content-generation.outputs.headline}
+        content: ${steps.content-generation.outputs.content}
+        description: ${steps.content-generation.outputs.body[0].content}
+        keywords: ${workflow.inputs.contentRequirements.keywords}
+        url: /${workflow.inputs.pageType}
+        brandName: ${workflow.inputs.brandInfo.name}
+    outputs:
+      - name: metaTags
+        path: data
+      - name: openGraph
+        path: data.openGraph
+      - name: twitter
+        path: data.twitter
+      - name: schema
+        path: data.schema
+    onSuccess:
+      - log: Meta tags generated successfully
+      - saveToContext: metaTags
+    onFailure:
+      - log: Meta tag generation failed
+      - continue: true  # Non-critical
+
+  # Step 6: Final Assembly
+  - id: final-assembly
+    name: Assemble Final Page
+    agent: orchestrator
+    description: Combine all outputs into final page structure
+    taskType: assembly
+    dependsOn:
+      - brand-identity
+      - layout-design
+      - content-generation
+      - seo-optimization
+      - meta-tags
+    parallel: false
+    optional: false
+    timeout: 60000
+    retryPolicy:
+      maxAttempts: 2
+      delay: 500
+      backoff: linear
+    inputs:
+      brandIdentity: ${steps.brand-identity.outputs.brandIdentity}
+      layout: ${steps.layout-design.outputs.layout}
+      content: ${steps.seo-optimization.outputs.optimizedContent}
+      metaTags: ${steps.meta-tags.outputs.metaTags}
+    outputs:
+      - name: completePage
+        path: data
+    onSuccess:
+      - log: Page assembled successfully
+      - saveToContext: completePage
+      - notify: success
+    onFailure:
+      - log: Final assembly failed
+      - notify: critical
+
+# Workflow outputs
+outputs:
+  - name: page
+    description: Complete page structure with all components
+    source: ${steps.final-assembly.outputs.completePage}
+
+  - name: assets
+    description: Generated assets (colors, typography, logo)
+    source: ${steps.brand-identity.outputs.brandIdentity}
+
+  - name: metadata
+    description: SEO metadata and meta tags
+    source: ${steps.meta-tags.outputs.metaTags}
+
+  - name: metrics
+    description: Workflow execution metrics
+    source: ${workflow.metrics}
+
+# Success criteria
+successCriteria:
+  - condition: all_steps_completed
+    description: All required steps completed successfully
+
+  - condition: seo_score_above_70
+    description: SEO score above 70
+    check: ${steps.seo-optimization.outputs.seoMetrics.score} > 70
+
+  - condition: content_quality
+    description: Content meets quality standards
+    check: ${steps.content-generation.outputs.content.metadata.wordCount} > 100
+
+# Error handling
+errorHandling:
+  - type: retry_failed_steps
+    maxRetries: 3
+    delay: 2000
+
+  - type: fallback_to_templates
+    condition: critical_failure
+    action: use_template_library
+
+  - type: notify_team
+    severity: critical
+    channels:
+      - slack
+      - email
+
+# Metrics to collect
+metrics:
+  - name: total_duration
+    type: duration
+    description: Total workflow execution time
+
+  - name: token_usage
+    type: counter
+    description: Total tokens used across all agents
+
+  - name: step_durations
+    type: histogram
+    description: Duration of each step
+
+  - name: success_rate
+    type: gauge
+    description: Workflow success rate
+
+# Tags and metadata
+metadata:
+  category: design
+  tags:
+    - page-design
+    - automated
+    - multi-agent
+  author: ReactorBro Stack
+  version: 1.0.0
+  createdAt: 2024-01-01
+  updatedAt: 2024-01-01

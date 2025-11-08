@@ -1,0 +1,137 @@
+---
+import DocLayout from '../layouts/DocLayout.astro';
+import { AssetManager } from '../../../../assets/core/asset-manager.js';
+
+let asset: any = null;
+let error: string | null = null;
+
+const assetId = Astro.url.searchParams.get('id');
+
+if (assetId) {
+  try {
+    const assetManager = new AssetManager();
+    await assetManager.loadFromStorage();
+    asset = await assetManager.getAsset(assetId);
+  } catch (e: any) {
+    error = e.message;
+  }
+}
+---
+
+<DocLayout title={asset ? `Preview: ${asset.name}` : 'Asset Preview'}>
+  <div class="max-w-6xl mx-auto">
+    {!assetId ? (
+      <div class="text-center py-12">
+        <h1 class="text-4xl font-bold mb-4">Asset Preview</h1>
+        <p class="text-gray-600 dark:text-gray-400 mb-8">
+          Enter an asset ID to preview it
+        </p>
+        <div class="max-w-md mx-auto">
+          <input
+            type="text"
+            id="asset-id-input"
+            placeholder="asset-id"
+            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 mb-4"
+          />
+          <button
+            onclick="previewAsset()"
+            class="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Preview Asset
+          </button>
+        </div>
+      </div>
+    ) : error ? (
+      <div class="text-center py-12">
+        <h1 class="text-4xl font-bold mb-4 text-red-600">Error</h1>
+        <p class="text-gray-600 dark:text-gray-400">{error}</p>
+      </div>
+    ) : asset ? (
+      <div class="space-y-8">
+        <div>
+          <h1 class="text-4xl font-bold mb-2">{asset.name}</h1>
+          <p class="text-gray-600 dark:text-gray-400">{asset.description}</p>
+          <div class="mt-4 flex gap-4">
+            <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded">
+              {asset.category}
+            </span>
+            <span class="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded">
+              v{asset.version}
+            </span>
+          </div>
+        </div>
+
+        {asset.category === 'ui-components' && asset.content?.code && (
+          <section class="border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4">Preview</h2>
+            <div class="border border-gray-200 dark:border-gray-800 rounded-lg p-8 bg-white dark:bg-gray-900">
+              <div id="component-preview" set:html={asset.content.code}></div>
+            </div>
+          </section>
+        )}
+
+        {asset.content?.code && (
+          <section class="border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-2xl font-semibold">Code</h2>
+              <button
+                onclick="copyCode()"
+                class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
+              >
+                Copy
+              </button>
+            </div>
+            <pre class="bg-gray-900 rounded-lg p-4 overflow-x-auto"><code id="code-content" class="text-sm text-gray-100">{asset.content.code}</code></pre>
+          </section>
+        )}
+
+        {asset.content?.config && (
+          <section class="border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4">Configuration</h2>
+            <pre class="bg-gray-900 rounded-lg p-4 overflow-x-auto"><code class="text-sm text-gray-100">{JSON.stringify(asset.content.config, null, 2)}</code></pre>
+          </section>
+        )}
+
+        <section class="border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+          <h2 class="text-2xl font-semibold mb-4">Details</h2>
+          <dl class="grid grid-cols-2 gap-4">
+            <div>
+              <dt class="font-semibold">Author</dt>
+              <dd class="text-gray-600 dark:text-gray-400">{asset.author}</dd>
+            </div>
+            <div>
+              <dt class="font-semibold">Status</dt>
+              <dd class="text-gray-600 dark:text-gray-400">{asset.status}</dd>
+            </div>
+            <div>
+              <dt class="font-semibold">Tags</dt>
+              <dd class="text-gray-600 dark:text-gray-400">{asset.tags.join(', ')}</dd>
+            </div>
+            <div>
+              <dt class="font-semibold">Rating</dt>
+              <dd class="text-gray-600 dark:text-gray-400">{asset.metadata.rating}/5.0</dd>
+            </div>
+          </dl>
+        </section>
+      </div>
+    ) : null}
+  </div>
+
+  <script>
+    function previewAsset() {
+      const assetId = document.getElementById('asset-id-input')?.value;
+      if (assetId) {
+        window.location.href = `/preview?id=${encodeURIComponent(assetId)}`;
+      }
+    }
+
+    function copyCode() {
+      const code = document.getElementById('code-content')?.textContent;
+      if (code) {
+        navigator.clipboard.writeText(code);
+        alert('Code copied to clipboard!');
+      }
+    }
+  </script>
+</DocLayout>
+

@@ -1,0 +1,217 @@
+---
+import DocLayout from '../layouts/DocLayout.astro';
+
+let deployments: any[] = [];
+let error: string | null = null;
+
+// Fetch deployments from API
+try {
+  const API_BASE = 'http://localhost:3002/api';
+  const response = await fetch(`${API_BASE}/deployments?limit=50`, {
+    headers: { 'Accept': 'application/json' },
+  });
+
+  if (response.ok) {
+    deployments = await response.json();
+  } else {
+    error = `Failed to load deployments: ${response.statusText}`;
+  }
+} catch (e: any) {
+  // Fallback to direct import if API not available
+  try {
+    const { DeploymentIntelligence } = await import('../../../../packages/scripts/src/deployment-intelligence.js');
+    const deploymentIntelligence = new DeploymentIntelligence();
+    deployments = deploymentIntelligence.getAllDeployments().slice(0, 50);
+  } catch (fallbackError: any) {
+    error = e.message || 'Failed to load deployments';
+  }
+}
+---
+
+<DocLayout title="Deployment Dashboard">
+  <div class="max-w-7xl mx-auto">
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold mb-4">Deployment Dashboard</h1>
+      <p class="text-gray-600 dark:text-gray-400">
+        Monitor and manage deployments across all sites
+      </p>
+    </div>
+
+    {error ? (
+      <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+        <p class="text-red-600 dark:text-red-400">Error loading deployments: {error}</p>
+      </div>
+    ) : (
+      <>
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div class="p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Total Deployments</h3>
+            <p class="text-3xl font-bold">{deployments.length}</p>
+          </div>
+          <div class="p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Successful</h3>
+            <p class="text-3xl font-bold text-green-600">
+              {deployments.filter(d => d.status === 'success').length}
+            </p>
+          </div>
+          <div class="p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Failed</h3>
+            <p class="text-3xl font-bold text-red-600">
+              {deployments.filter(d => d.status === 'failed').length}
+            </p>
+          </div>
+          <div class="p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">In Progress</h3>
+            <p class="text-3xl font-bold text-blue-600">
+              {deployments.filter(d => d.status === 'deploying' || d.status === 'building').length}
+            </p>
+          </div>
+        </div>
+
+        <!-- Deployment List -->
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-xl font-semibold">Recent Deployments</h2>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead class="bg-gray-50 dark:bg-gray-900">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Site
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Started
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Duration
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                {deployments.length === 0 ? (
+                  <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                      No deployments found
+                    </td>
+                  </tr>
+                ) : (
+                  deployments.map((deployment) => {
+                    const statusIcon =
+                      deployment.status === 'success'
+                        ? '✅'
+                        : deployment.status === 'failed'
+                          ? '❌'
+                          : deployment.status === 'rolled-back'
+                            ? '🔄'
+                            : '⏳';
+                    const statusColor =
+                      deployment.status === 'success'
+                        ? 'text-green-600 dark:text-green-400'
+                        : deployment.status === 'failed'
+                          ? 'text-red-600 dark:text-red-400'
+                          : deployment.status === 'rolled-back'
+                            ? 'text-yellow-600 dark:text-yellow-400'
+                            : 'text-blue-600 dark:text-blue-400';
+
+                    const duration = deployment.completedAt && deployment.startedAt
+                      ? `${((new Date(deployment.completedAt).getTime() - new Date(deployment.startedAt).getTime()) / 1000).toFixed(1)}s`
+                      : '—';
+
+                    return (
+                      <tr class="hover:bg-gray-50 dark:hover:bg-gray-900">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <div class="font-medium">{deployment.siteId}</div>
+                          <div class="text-sm text-gray-500 dark:text-gray-400">{deployment.id}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span class={`${statusColor} font-medium`}>
+                            {statusIcon} {deployment.status}
+                          </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                          {new Date(deployment.startedAt).toLocaleString()}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                          {duration}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                          <div class="flex gap-2">
+                            <a
+                              href={`/deployments/${deployment.id}`}
+                              class="text-blue-600 dark:text-blue-400 hover:underline"
+                            >
+                              View
+                            </a>
+                            {deployment.status === 'failed' && (
+                              <button
+                                onclick={`rollbackDeployment('${deployment.id}')`}
+                                class="text-red-600 dark:text-red-400 hover:underline"
+                              >
+                                Rollback
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </>
+    )}
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3002/api';
+
+    async function rollbackDeployment(deploymentId: string) {
+      if (!confirm(`Rollback deployment ${deploymentId}?`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/deployments/${deploymentId}/rollback`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason: 'Manual rollback from dashboard' }),
+        });
+
+        if (response.ok) {
+          alert('Rollback initiated successfully!');
+          // Refresh page after a moment
+          setTimeout(() => window.location.reload(), 1000);
+        } else {
+          const error = await response.json();
+          alert(`Failed to rollback: ${error.error}`);
+        }
+      } catch (error) {
+        console.error('Error rolling back deployment:', error);
+        alert('Failed to rollback deployment. Check console for details.');
+      }
+    }
+
+    // Auto-refresh deployments every 30 seconds
+    setInterval(() => {
+      fetch(`${API_BASE}/deployments?limit=50`)
+        .then(res => res.json())
+        .then(data => {
+          // Update deployments list
+          console.log('Deployments updated:', data);
+        })
+        .catch(err => console.error('Failed to refresh deployments:', err));
+    }, 30000);
+  </script>
+</DocLayout>
+

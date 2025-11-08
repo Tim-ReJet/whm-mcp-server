@@ -1,0 +1,163 @@
+# Multi-Site Deployment Example
+# Copy this file to .github/workflows/ and customize per site
+
+name: Deploy Multi-Site
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/astro/**'
+      - 'sites/**'
+      - 'packages/**'
+  workflow_dispatch:
+    inputs:
+      site:
+        description: 'Site to deploy (leave empty for all)'
+        required: false
+        type: string
+
+jobs:
+  # Detect which sites changed
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      sites: ${{ steps.detect.outputs.sites }}
+      deploy-all: ${{ steps.detect.outputs.deploy-all }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed sites
+        id: detect
+        run: |
+          if [ "${{ github.event.inputs.site }}" != "" ]; then
+            echo "sites=[\"${{ github.event.inputs.site }}\"]" >> $GITHUB_OUTPUT
+            echo "deploy-all=false" >> $GITHUB_OUTPUT
+          elif git diff --name-only HEAD^ HEAD | grep -q "packages/"; then
+            # If packages changed, deploy all sites
+            sites=$(ls -d sites/*/ | grep -v "_template" | xargs -n1 basename | jq -R -s -c 'split("\n")[:-1]')
+            echo "sites=$sites" >> $GITHUB_OUTPUT
+            echo "deploy-all=true" >> $GITHUB_OUTPUT
+          else
+            # Detect which sites have changes
+            changed_sites=$(git diff --name-only HEAD^ HEAD | grep "^sites/" | cut -d'/' -f2 | grep -v "_template" | sort -u | jq -R -s -c 'split("\n")[:-1]')
+            if [ "$changed_sites" = "[]" ] || [ "$changed_sites" = '[""]' ]; then
+              changed_sites='[]'
+            fi
+            echo "sites=$changed_sites" >> $GITHUB_OUTPUT
+            echo "deploy-all=false" >> $GITHUB_OUTPUT
+          fi
+
+  # Deploy Berg Projects
+  deploy-berg-projects:
+    needs: detect-changes
+    if: contains(fromJSON(needs.detect-changes.outputs.sites), 'berg-projects')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build design tokens
+        run: pnpm tokens
+
+      - name: Activate site
+        run: pnpm site:use berg-projects
+
+      - name: Build site
+        run: pnpm site:build berg-projects
+        env:
+          SITE_ID: berg-projects
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: berg-projects
+          directory: apps/astro/dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+  # Deploy ACME Corp (example additional site)
+  deploy-acme-corp:
+    needs: detect-changes
+    if: contains(fromJSON(needs.detect-changes.outputs.sites), 'acme-corp')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build design tokens
+        run: pnpm tokens
+
+      - name: Activate site
+        run: pnpm site:use acme-corp
+
+      - name: Build site
+        run: pnpm site:build acme-corp
+        env:
+          SITE_ID: acme-corp
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: acme-corp
+          directory: apps/astro/dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+  # Build status notification
+  notify:
+    needs: [detect-changes, deploy-berg-projects, deploy-acme-corp]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deployment Summary
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Sites to deploy:** ${{ needs.detect-changes.outputs.sites }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Deploy all:** ${{ needs.detect-changes.outputs.deploy-all }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ needs.deploy-berg-projects.result }}" = "success" ]; then
+            echo "✅ Berg Projects deployed successfully" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.deploy-berg-projects.result }}" = "failure" ]; then
+            echo "❌ Berg Projects deployment failed" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.deploy-berg-projects.result }}" = "skipped" ]; then
+            echo "⏭️ Berg Projects skipped (no changes)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ needs.deploy-acme-corp.result }}" = "success" ]; then
+            echo "✅ ACME Corp deployed successfully" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.deploy-acme-corp.result }}" = "failure" ]; then
+            echo "❌ ACME Corp deployment failed" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.deploy-acme-corp.result }}" = "skipped" ]; then
+            echo "⏭️ ACME Corp skipped (no changes)" >> $GITHUB_STEP_SUMMARY
+          fi

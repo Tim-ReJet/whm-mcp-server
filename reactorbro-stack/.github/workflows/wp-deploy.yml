@@ -1,0 +1,24 @@
+
+name: WP Headless Deploy (rsync)
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - "apps/wp/wp-content/**"
+      - "apps/wp/mu-plugins/**"
+      - "apps/wp/public/wp-content/**"
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rsync wp-content to VPS
+        uses: burnett01/rsync-deployments@6.0.0
+        with:
+          switches: -avzr --delete
+          path: apps/wp/public/wp-content/
+          remote_path: ${{ secrets.WP_REMOTE_PATH }}/wp-content/
+          remote_host: ${{ secrets.WP_REMOTE_HOST }}
+          remote_user: ${{ secrets.WP_REMOTE_USER }}
+          remote_key: ${{ secrets.WP_SSH_KEY }}

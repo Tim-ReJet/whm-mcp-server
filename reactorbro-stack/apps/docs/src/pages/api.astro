@@ -1,0 +1,112 @@
+---
+import DocLayout from '../layouts/DocLayout.astro';
+
+// Load OpenAPI spec
+let openApiSpec: any = {};
+try {
+  const specContent = await import('../../../docs/openapi.json');
+  openApiSpec = specContent.default || specContent;
+} catch {
+  // Spec might not exist yet
+}
+---
+
+<DocLayout title="API Reference">
+  <div class="max-w-6xl mx-auto">
+    <h1 class="text-4xl font-bold mb-8">API Reference</h1>
+
+    <div class="mb-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+      <p class="text-sm">
+        <strong>OpenAPI Spec:</strong>
+        <a href="/openapi.json" class="text-blue-600 dark:text-blue-400 hover:underline" download>
+          Download openapi.json
+        </a>
+      </p>
+    </div>
+
+    {Object.keys(openApiSpec.paths || {}).length > 0 ? (
+      <div class="space-y-8">
+        {Object.entries(openApiSpec.paths || {}).map(([path, methods]: [string, any]) => (
+          <section class="border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4 font-mono">{path}</h2>
+
+            {Object.entries(methods).map(([method, details]: [string, any]) => (
+              <div class="mb-6">
+                <div class="flex items-center gap-3 mb-2">
+                  <span class={`px-3 py-1 rounded text-sm font-semibold ${
+                    method === 'get' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                    method === 'post' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                    method === 'put' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                    method === 'delete' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                    'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                  }`}>
+                    {method.toUpperCase()}
+                  </span>
+                  <h3 class="text-xl font-semibold">{details.summary}</h3>
+                </div>
+
+                {details.description && (
+                  <p class="text-gray-600 dark:text-gray-400 mb-4">{details.description}</p>
+                )}
+
+                {details.parameters && details.parameters.length > 0 && (
+                  <div class="mb-4">
+                    <h4 class="font-semibold mb-2">Parameters</h4>
+                    <div class="overflow-x-auto">
+                      <table class="min-w-full border border-gray-200 dark:border-gray-800">
+                        <thead class="bg-gray-50 dark:bg-gray-900">
+                          <tr>
+                            <th class="px-4 py-2 text-left">Name</th>
+                            <th class="px-4 py-2 text-left">In</th>
+                            <th class="px-4 py-2 text-left">Required</th>
+                            <th class="px-4 py-2 text-left">Type</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {details.parameters.map((param: any) => (
+                            <tr class="border-t border-gray-200 dark:border-gray-800">
+                              <td class="px-4 py-2 font-mono">{param.name}</td>
+                              <td class="px-4 py-2">{param.in}</td>
+                              <td class="px-4 py-2">{param.required ? 'Yes' : 'No'}</td>
+                              <td class="px-4 py-2">{param.schema?.type || 'object'}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {details.responses && (
+                  <div>
+                    <h4 class="font-semibold mb-2">Responses</h4>
+                    <div class="space-y-2">
+                      {Object.entries(details.responses).map(([code, response]: [string, any]) => (
+                        <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded">
+                          <span class="font-mono font-semibold">{code}</span>
+                          {response.description && (
+                            <span class="ml-2 text-gray-600 dark:text-gray-400">{response.description}</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </section>
+        ))}
+      </div>
+    ) : (
+      <div class="text-center py-12">
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
+          OpenAPI specification not found. Generate it first:
+        </p>
+        <code class="block p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+          pnpm openapi:generate
+        </code>
+      </div>
+    )}
+  </div>
+</DocLayout>
+

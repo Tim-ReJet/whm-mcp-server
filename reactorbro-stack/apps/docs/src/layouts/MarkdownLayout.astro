@@ -1,0 +1,11 @@
+---
+import type { MarkdownLayoutProps } from 'astro';
+import DocLayout from '../layouts/DocLayout.astro';
+
+const props = Astro.props;
+---
+
+<DocLayout {...props}>
+  <slot />
+</DocLayout>
+

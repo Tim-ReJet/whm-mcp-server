@@ -1,0 +1,402 @@
+---
+/**
+ * AnimatedCard Component
+ *
+ * A card component with built-in scroll reveal and hover animations.
+ * Combines entrance animations with interactive hover effects.
+ *
+ * @example
+ * ```astro
+ * <AnimatedCard>
+ *   <h3>Card Title</h3>
+ *   <p>Card content goes here</p>
+ * </AnimatedCard>
+ * ```
+ *
+ * @example
+ * ```astro
+ * <AnimatedCard
+ *   animationType="scale"
+ *   hoverEffect="lift"
+ *   delay={200}
+ * >
+ *   <div class="card-content">Content</div>
+ * </AnimatedCard>
+ * ```
+ */
+
+interface Props {
+  /**
+   * Type of entrance animation
+   * @default 'fade'
+   */
+  animationType?: 'fade' | 'slide' | 'scale' | 'zoom';
+
+  /**
+   * Direction for slide animations
+   * @default 'up'
+   */
+  direction?: 'up' | 'down' | 'left' | 'right';
+
+  /**
+   * Hover effect type
+   * @default 'lift'
+   */
+  hoverEffect?: 'lift' | 'scale' | 'glow' | 'none';
+
+  /**
+   * Animation delay in milliseconds
+   * @default 0
+   */
+  delay?: number;
+
+  /**
+   * Animation duration in milliseconds
+   * @default 600
+   */
+  duration?: number;
+
+  /**
+   * Easing function
+   * @default 'easeOutExpo'
+   */
+  easing?: string;
+
+  /**
+   * Additional CSS classes
+   */
+  class?: string;
+
+  /**
+   * Disable animation (useful for testing)
+   * @default false
+   */
+  disableAnimation?: boolean;
+
+  /**
+   * Disable hover effects
+   * @default false
+   */
+  disableHover?: boolean;
+
+  /**
+   * Animation trigger threshold (0-1)
+   * @default 0.1
+   */
+  threshold?: number;
+
+  /**
+   * Link URL (makes entire card clickable)
+   */
+  href?: string;
+
+  /**
+   * Link target
+   * @default '_self'
+   */
+  target?: string;
+}
+
+const {
+  animationType = 'fade',
+  direction = 'up',
+  hoverEffect = 'lift',
+  delay = 0,
+  duration = 600,
+  easing = 'easeOutExpo',
+  class: className = '',
+  disableAnimation = false,
+  disableHover = false,
+  threshold = 0.1,
+  href,
+  target = '_self',
+} = Astro.props;
+
+// Generate unique ID for this instance
+const instanceId = `animated-card-${Math.random().toString(36).substring(2, 9)}`;
+const hoverClass = disableHover ? '' : `hover-${hoverEffect}`;
+const CardTag = href ? 'a' : 'div';
+---
+
+<CardTag
+  id={instanceId}
+  href={href}
+  target={href ? target : undefined}
+  class={`animated-card ${hoverClass} ${className}`}
+  data-animation={animationType}
+  data-direction={direction}
+  data-delay={delay}
+  data-duration={duration}
+  data-easing={easing}
+  data-disable={disableAnimation}
+  data-threshold={threshold}
+  data-animated="false"
+>
+  <slot />
+</CardTag>
+
+<script>
+  // anime.js uses CommonJS exports
+  const anime = require('animejs');
+
+  /**
+   * Check if user prefers reduced motion
+   */
+  function prefersReducedMotion(): boolean {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  /**
+   * Initialize animations for all AnimatedCard components
+   */
+  function initCardAnimations() {
+    const cards = document.querySelectorAll('.animated-card');
+
+    cards.forEach((card) => {
+      const element = card as HTMLElement;
+
+      // Skip if already animated
+      if (element.dataset.animated === 'true') {
+        return;
+      }
+
+      const animationType = element.dataset.animation || 'fade';
+      const direction = element.dataset.direction || 'up';
+      const delay = parseInt(element.dataset.delay || '0');
+      const duration = parseInt(element.dataset.duration || '600');
+      const easing = element.dataset.easing || 'easeOutExpo';
+      const disableAnimation = element.dataset.disable === 'true';
+      const threshold = parseFloat(element.dataset.threshold || '0.1');
+
+      // If animations disabled or user prefers reduced motion, show immediately
+      if (disableAnimation || prefersReducedMotion()) {
+        element.style.opacity = '1';
+        element.style.transform = 'none';
+        element.dataset.animated = 'true';
+        return;
+      }
+
+      // Set initial state based on animation type
+      setInitialState(element, animationType, direction);
+
+      // Create intersection observer
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && element.dataset.animated === 'false') {
+              animateCard(element, animationType, direction, delay, duration, easing);
+              observer.unobserve(element);
+            }
+          });
+        },
+        {
+          threshold: threshold,
+          rootMargin: '-50px',
+        }
+      );
+
+      observer.observe(element);
+    });
+  }
+
+  /**
+   * Set initial state for animation
+   */
+  function setInitialState(element: HTMLElement, type: string, direction: string) {
+    element.style.opacity = '0';
+
+    switch (type) {
+      case 'fade':
+        // Opacity only, no transform
+        break;
+
+      case 'slide':
+        switch (direction) {
+          case 'up':
+            element.style.transform = 'translateY(30px)';
+            break;
+          case 'down':
+            element.style.transform = 'translateY(-30px)';
+            break;
+          case 'left':
+            element.style.transform = 'translateX(30px)';
+            break;
+          case 'right':
+            element.style.transform = 'translateX(-30px)';
+            break;
+        }
+        break;
+
+      case 'scale':
+        element.style.transform = 'scale(0.9)';
+        break;
+
+      case 'zoom':
+        element.style.transform = 'scale(0)';
+        break;
+    }
+  }
+
+  /**
+   * Animate card based on type
+   */
+  function animateCard(
+    element: HTMLElement,
+    type: string,
+    direction: string,
+    delay: number,
+    duration: number,
+    easing: string
+  ) {
+    element.dataset.animated = 'true';
+
+    const baseConfig = {
+      targets: element,
+      delay: delay,
+      duration: duration,
+      easing: easing,
+      opacity: [0, 1],
+    };
+
+    switch (type) {
+      case 'fade':
+        anime(baseConfig);
+        break;
+
+      case 'slide':
+        let transform: Record<string, [number, number]> = {};
+        switch (direction) {
+          case 'up':
+            transform = { translateY: [30, 0] };
+            break;
+          case 'down':
+            transform = { translateY: [-30, 0] };
+            break;
+          case 'left':
+            transform = { translateX: [30, 0] };
+            break;
+          case 'right':
+            transform = { translateX: [-30, 0] };
+            break;
+        }
+        anime({
+          ...baseConfig,
+          ...transform,
+        });
+        break;
+
+      case 'scale':
+        anime({
+          ...baseConfig,
+          scale: [0.9, 1],
+        });
+        break;
+
+      case 'zoom':
+        anime({
+          ...baseConfig,
+          scale: [0, 1],
+        });
+        break;
+    }
+  }
+
+  /**
+   * Reset animations (for page transitions)
+   */
+  function resetCardAnimations() {
+    const cards = document.querySelectorAll('.animated-card');
+    cards.forEach((card) => {
+      const element = card as HTMLElement;
+      element.dataset.animated = 'false';
+      if (!prefersReducedMotion()) {
+        const animationType = element.dataset.animation || 'fade';
+        const direction = element.dataset.direction || 'up';
+        setInitialState(element, animationType, direction);
+      }
+    });
+  }
+
+  // Initialize on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCardAnimations);
+  } else {
+    initCardAnimations();
+  }
+
+  // Re-initialize on Astro view transitions
+  document.addEventListener('astro:page-load', () => {
+    resetCardAnimations();
+    initCardAnimations();
+  });
+
+  // Listen for motion preference changes
+  const motionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  motionMediaQuery.addEventListener('change', () => {
+    if (prefersReducedMotion()) {
+      // Show all cards immediately
+      const cards = document.querySelectorAll('.animated-card');
+      cards.forEach((card) => {
+        const element = card as HTMLElement;
+        element.style.opacity = '1';
+        element.style.transform = 'none';
+      });
+    }
+  });
+</script>
+
+<style>
+  .animated-card {
+    /* Prevent layout shift during animation */
+    will-change: opacity, transform;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: block;
+  }
+
+  /* Hover Effects */
+  .hover-lift:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.03);
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Remove hover effects if link */
+  a.animated-card {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  /* Fallback for no-JS */
+  .animated-card:not([data-animated]) {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Respect reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .animated-card {
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+      transition: none !important;
+    }
+
+    .animated-card:hover {
+      transform: none !important;
+    }
+  }
+
+  /* Focus styles for accessibility */
+  a.animated-card:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+</style>

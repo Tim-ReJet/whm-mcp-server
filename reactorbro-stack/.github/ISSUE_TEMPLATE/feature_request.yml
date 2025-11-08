@@ -1,0 +1,198 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature! Please fill out the sections below to help us understand your request.
+
+  - type: dropdown
+    id: feature-area
+    attributes:
+      label: Feature Area
+      description: Which part of the project would this feature affect?
+      options:
+        - Astro Frontend
+        - WordPress Backend
+        - GraphQL API
+        - Design System / Tokens
+        - UI Components
+        - Developer Experience / Tooling
+        - Build System / Performance
+        - Documentation
+        - CI/CD / Deployment
+        - Multiple Areas
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve? What pain point are you experiencing?
+      placeholder: |
+        As a [user/developer], I want to [do something] because [reason].
+        Currently, I have to [workaround/manual process].
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: Describe your ideal solution to this problem
+      placeholder: |
+        I would like to see...
+        This could work by...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: Have you considered any alternative approaches?
+      placeholder: |
+        Another way to solve this could be...
+        We could also...
+
+  - type: textarea
+    id: use-cases
+    attributes:
+      label: Use Cases
+      description: Describe specific scenarios where this feature would be useful
+      placeholder: |
+        Use Case 1: ...
+        Use Case 2: ...
+        Use Case 3: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Design Mockups / Examples
+      description: If applicable, add mockups, wireframes, or examples from other projects
+      placeholder: Drag and drop images here or paste URLs
+
+  - type: textarea
+    id: technical-details
+    attributes:
+      label: Technical Considerations
+      description: Any technical details, APIs, libraries, or implementation notes?
+      placeholder: |
+        - This might require package X
+        - Could integrate with API Y
+        - May need to refactor Z
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - Critical - Blocking current work
+        - High - Would significantly improve workflow
+        - Medium - Nice to have, improves experience
+        - Low - Minor improvement
+    validations:
+      required: true
+
+  - type: dropdown
+    id: urgency
+    attributes:
+      label: Urgency
+      description: How soon do you need this feature?
+      options:
+        - Urgent - Needed this week
+        - Soon - Needed this month
+        - Normal - Needed this quarter
+        - Low - Can wait
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: complexity
+    attributes:
+      label: Estimated Complexity
+      description: If you're familiar with the codebase, estimate the complexity
+      options:
+        - label: Small - Can be done in a few hours
+        - label: Medium - Will take 1-3 days
+        - label: Large - Will take a week or more
+        - label: Unknown - Not sure about the complexity
+
+  - type: checkboxes
+    id: breaking-changes
+    attributes:
+      label: Breaking Changes
+      description: Would this feature require breaking changes?
+      options:
+        - label: Yes, this would introduce breaking changes
+        - label: No, this is backwards compatible
+        - label: Unsure about compatibility impact
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: What needs to be true for this feature to be considered "done"?
+      placeholder: |
+        - [ ] User can do X
+        - [ ] System behaves Y when Z
+        - [ ] Documentation is updated
+        - [ ] Tests are added
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Are there any other features or issues that need to be completed first?
+      placeholder: |
+        - Depends on #123
+        - Requires feature X to be completed
+
+  - type: dropdown
+    id: willing-to-implement
+    attributes:
+      label: Implementation
+      description: Are you willing to implement this feature?
+      options:
+        - Yes, I can implement this
+        - Yes, with guidance
+        - No, but I can help test
+        - No, requesting from team
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context, research, or links about the feature request
+      placeholder: |
+        - Similar feature in other tools: [link]
+        - Related discussion: [link]
+        - Relevant documentation: [link]
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched for similar feature requests before creating this one
+          required: true
+        - label: I have clearly described the problem and proposed solution
+          required: true
+        - label: I have considered the impact on existing functionality
+          required: true
+        - label: I have provided use cases and acceptance criteria
+          required: true

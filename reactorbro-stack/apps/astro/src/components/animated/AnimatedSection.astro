@@ -1,0 +1,342 @@
+---
+/**
+ * AnimatedSection Component
+ *
+ * A wrapper component that adds scroll-triggered animations to any content.
+ * Respects user motion preferences and provides accessible fallbacks.
+ *
+ * @example
+ * ```astro
+ * <AnimatedSection animationType="fade">
+ *   <h2>Your Content</h2>
+ * </AnimatedSection>
+ * ```
+ *
+ * @example
+ * ```astro
+ * <AnimatedSection animationType="slide" direction="up" delay={200}>
+ *   <div class="card">Card content</div>
+ * </AnimatedSection>
+ * ```
+ */
+
+interface Props {
+  /**
+   * Type of animation to apply
+   * @default 'fade'
+   */
+  animationType?: 'fade' | 'slide' | 'scale' | 'zoom';
+
+  /**
+   * Direction for slide animations
+   * @default 'up'
+   */
+  direction?: 'up' | 'down' | 'left' | 'right';
+
+  /**
+   * Animation delay in milliseconds
+   * @default 0
+   */
+  delay?: number;
+
+  /**
+   * Animation duration in milliseconds
+   * @default 800
+   */
+  duration?: number;
+
+  /**
+   * Easing function
+   * @default 'easeOutExpo'
+   */
+  easing?: string;
+
+  /**
+   * Additional CSS classes
+   */
+  class?: string;
+
+  /**
+   * Disable animation (useful for testing)
+   * @default false
+   */
+  disableAnimation?: boolean;
+
+  /**
+   * Animation trigger threshold (0-1)
+   * @default 0.1
+   */
+  threshold?: number;
+
+  /**
+   * Root margin for intersection observer
+   * @default '-50px'
+   */
+  rootMargin?: string;
+}
+
+const {
+  animationType = 'fade',
+  direction = 'up',
+  delay = 0,
+  duration = 800,
+  easing = 'easeOutExpo',
+  class: className = '',
+  disableAnimation = false,
+  threshold = 0.1,
+  rootMargin = '-50px',
+} = Astro.props;
+
+// Generate unique ID for this instance
+const instanceId = `animated-section-${Math.random().toString(36).substring(2, 9)}`;
+---
+
+<div
+  id={instanceId}
+  class={`animated-section ${className}`}
+  data-animation={animationType}
+  data-direction={direction}
+  data-delay={delay}
+  data-duration={duration}
+  data-easing={easing}
+  data-disable={disableAnimation}
+  data-threshold={threshold}
+  data-root-margin={rootMargin}
+  data-animated="false"
+>
+  <slot />
+</div>
+
+<script>
+  // anime.js uses CommonJS exports
+  const anime = require('animejs');
+
+  /**
+   * Check if user prefers reduced motion
+   */
+  function prefersReducedMotion(): boolean {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  /**
+   * Initialize animations for all AnimatedSection components
+   */
+  function initAnimations() {
+    const sections = document.querySelectorAll('.animated-section');
+
+    sections.forEach((section) => {
+      const element = section as HTMLElement;
+
+      // Skip if already animated
+      if (element.dataset.animated === 'true') {
+        return;
+      }
+
+      const animationType = element.dataset.animation || 'fade';
+      const direction = element.dataset.direction || 'up';
+      const delay = parseInt(element.dataset.delay || '0');
+      const duration = parseInt(element.dataset.duration || '800');
+      const easing = element.dataset.easing || 'easeOutExpo';
+      const disableAnimation = element.dataset.disable === 'true';
+      const threshold = parseFloat(element.dataset.threshold || '0.1');
+      const rootMargin = element.dataset.rootMargin || '-50px';
+
+      // If animations disabled or user prefers reduced motion, show immediately
+      if (disableAnimation || prefersReducedMotion()) {
+        element.style.opacity = '1';
+        element.style.transform = 'none';
+        element.dataset.animated = 'true';
+        return;
+      }
+
+      // Set initial state based on animation type
+      setInitialState(element, animationType, direction);
+
+      // Create intersection observer
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && element.dataset.animated === 'false') {
+              animateElement(element, animationType, direction, delay, duration, easing);
+              observer.unobserve(element);
+            }
+          });
+        },
+        {
+          threshold: threshold,
+          rootMargin: rootMargin,
+        }
+      );
+
+      observer.observe(element);
+    });
+  }
+
+  /**
+   * Set initial state for animation
+   */
+  function setInitialState(element: HTMLElement, type: string, direction: string) {
+    element.style.opacity = '0';
+
+    switch (type) {
+      case 'fade':
+        // Opacity only, no transform
+        break;
+
+      case 'slide':
+        switch (direction) {
+          case 'up':
+            element.style.transform = 'translateY(50px)';
+            break;
+          case 'down':
+            element.style.transform = 'translateY(-50px)';
+            break;
+          case 'left':
+            element.style.transform = 'translateX(50px)';
+            break;
+          case 'right':
+            element.style.transform = 'translateX(-50px)';
+            break;
+        }
+        break;
+
+      case 'scale':
+        element.style.transform = 'scale(0.8)';
+        break;
+
+      case 'zoom':
+        element.style.transform = 'scale(0)';
+        break;
+    }
+  }
+
+  /**
+   * Animate element based on type
+   */
+  function animateElement(
+    element: HTMLElement,
+    type: string,
+    direction: string,
+    delay: number,
+    duration: number,
+    easing: string
+  ) {
+    element.dataset.animated = 'true';
+
+    const baseConfig = {
+      targets: element,
+      delay: delay,
+      duration: duration,
+      easing: easing,
+      opacity: [0, 1],
+    };
+
+    switch (type) {
+      case 'fade':
+        anime(baseConfig);
+        break;
+
+      case 'slide':
+        let transform: Record<string, [number, number]> = {};
+        switch (direction) {
+          case 'up':
+            transform = { translateY: [50, 0] };
+            break;
+          case 'down':
+            transform = { translateY: [-50, 0] };
+            break;
+          case 'left':
+            transform = { translateX: [50, 0] };
+            break;
+          case 'right':
+            transform = { translateX: [-50, 0] };
+            break;
+        }
+        anime({
+          ...baseConfig,
+          ...transform,
+        });
+        break;
+
+      case 'scale':
+        anime({
+          ...baseConfig,
+          scale: [0.8, 1],
+        });
+        break;
+
+      case 'zoom':
+        anime({
+          ...baseConfig,
+          scale: [0, 1],
+        });
+        break;
+    }
+  }
+
+  /**
+   * Reset animations (for page transitions)
+   */
+  function resetAnimations() {
+    const sections = document.querySelectorAll('.animated-section');
+    sections.forEach((section) => {
+      const element = section as HTMLElement;
+      element.dataset.animated = 'false';
+      if (!prefersReducedMotion()) {
+        const animationType = element.dataset.animation || 'fade';
+        const direction = element.dataset.direction || 'up';
+        setInitialState(element, animationType, direction);
+      }
+    });
+  }
+
+  // Initialize on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAnimations);
+  } else {
+    initAnimations();
+  }
+
+  // Re-initialize on Astro view transitions
+  document.addEventListener('astro:page-load', () => {
+    resetAnimations();
+    initAnimations();
+  });
+
+  // Listen for motion preference changes
+  const motionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  motionMediaQuery.addEventListener('change', () => {
+    if (prefersReducedMotion()) {
+      // Show all elements immediately
+      const sections = document.querySelectorAll('.animated-section');
+      sections.forEach((section) => {
+        const element = section as HTMLElement;
+        element.style.opacity = '1';
+        element.style.transform = 'none';
+      });
+    }
+  });
+</script>
+
+<style>
+  .animated-section {
+    /* Prevent layout shift during animation */
+    will-change: opacity, transform;
+  }
+
+  /* Fallback for no-JS */
+  .animated-section:not([data-animated]) {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Respect reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .animated-section {
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+</style>

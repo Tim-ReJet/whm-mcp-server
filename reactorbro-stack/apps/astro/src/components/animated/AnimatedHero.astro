@@ -1,0 +1,567 @@
+---
+/**
+ * AnimatedHero Component
+ *
+ * A hero section component with sophisticated staggered entrance animations.
+ * Animates title, subtitle, description, and CTAs in sequence.
+ *
+ * @example
+ * ```astro
+ * <AnimatedHero
+ *   title="Welcome to Berg Projects"
+ *   subtitle="Excellence in Construction"
+ * >
+ *   <p>Building quality structures since 1995</p>
+ *   <div slot="cta">
+ *     <AnimatedButton href="/contact">Get Started</AnimatedButton>
+ *   </div>
+ * </AnimatedHero>
+ * ```
+ */
+
+interface Props {
+  /**
+   * Hero title (required)
+   */
+  title: string;
+
+  /**
+   * Hero subtitle
+   */
+  subtitle?: string;
+
+  /**
+   * Background image URL
+   */
+  backgroundImage?: string;
+
+  /**
+   * Background overlay opacity (0-1)
+   * @default 0.6
+   */
+  overlayOpacity?: number;
+
+  /**
+   * Animation style
+   * @default 'stagger'
+   */
+  animationStyle?: 'stagger' | 'fade' | 'slide' | 'none';
+
+  /**
+   * Text alignment
+   * @default 'center'
+   */
+  align?: 'left' | 'center' | 'right';
+
+  /**
+   * Hero height
+   * @default 'large'
+   */
+  height?: 'small' | 'medium' | 'large' | 'full';
+
+  /**
+   * Enable parallax scroll effect
+   * @default false
+   */
+  parallax?: boolean;
+
+  /**
+   * Additional CSS classes
+   */
+  class?: string;
+
+  /**
+   * Disable animations
+   * @default false
+   */
+  disableAnimation?: boolean;
+
+  /**
+   * Stagger delay between elements (ms)
+   * @default 100
+   */
+  staggerDelay?: number;
+
+  /**
+   * Initial animation delay (ms)
+   * @default 200
+   */
+  initialDelay?: number;
+}
+
+const {
+  title,
+  subtitle,
+  backgroundImage,
+  overlayOpacity = 0.6,
+  animationStyle = 'stagger',
+  align = 'center',
+  height = 'large',
+  parallax = false,
+  class: className = '',
+  disableAnimation = false,
+  staggerDelay = 100,
+  initialDelay = 200,
+} = Astro.props;
+
+// Generate unique ID for this instance
+const instanceId = `animated-hero-${Math.random().toString(36).substring(2, 9)}`;
+
+const heroClasses = [
+  'animated-hero',
+  `align-${align}`,
+  `height-${height}`,
+  parallax ? 'parallax' : '',
+  className,
+].filter(Boolean).join(' ');
+---
+
+<section
+  id={instanceId}
+  class={heroClasses}
+  data-animation={animationStyle}
+  data-disable={disableAnimation}
+  data-stagger-delay={staggerDelay}
+  data-initial-delay={initialDelay}
+  data-parallax={parallax}
+>
+  {backgroundImage && (
+    <div
+      class="hero-background"
+      style={`background-image: url(${backgroundImage});`}
+      data-parallax-layer="background"
+    >
+      <div class="hero-overlay" style={`opacity: ${overlayOpacity};`}></div>
+    </div>
+  )}
+
+  <div class="hero-content">
+    {subtitle && (
+      <div class="hero-subtitle" data-animate="subtitle">
+        {subtitle}
+      </div>
+    )}
+
+    <h1 class="hero-title" data-animate="title">
+      {title}
+    </h1>
+
+    <div class="hero-description" data-animate="description">
+      <slot />
+    </div>
+
+    <div class="hero-cta" data-animate="cta">
+      <slot name="cta" />
+    </div>
+  </div>
+
+  <div class="hero-scroll-indicator" data-animate="scroll-indicator">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 5v14M5 12l7 7 7-7" />
+    </svg>
+  </div>
+</section>
+
+<script>
+  // anime.js uses CommonJS exports
+  const anime = require('animejs');
+
+  /**
+   * Check if user prefers reduced motion
+   */
+  function prefersReducedMotion(): boolean {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  /**
+   * Initialize hero animations
+   */
+  function initHeroAnimations() {
+    const heroes = document.querySelectorAll('.animated-hero');
+
+    heroes.forEach((hero) => {
+      const element = hero as HTMLElement;
+      const animationStyle = element.dataset.animation || 'stagger';
+      const disableAnimation = element.dataset.disable === 'true';
+      const staggerDelay = parseInt(element.dataset.staggerDelay || '100');
+      const initialDelay = parseInt(element.dataset.initialDelay || '200');
+      const isParallax = element.dataset.parallax === 'true';
+
+      // Skip animations if disabled or user prefers reduced motion
+      if (disableAnimation || prefersReducedMotion()) {
+        showHeroImmediately(element);
+        return;
+      }
+
+      // Apply animation based on style
+      switch (animationStyle) {
+        case 'stagger':
+          animateHeroStagger(element, initialDelay, staggerDelay);
+          break;
+        case 'fade':
+          animateHeroFade(element, initialDelay);
+          break;
+        case 'slide':
+          animateHeroSlide(element, initialDelay);
+          break;
+        case 'none':
+          showHeroImmediately(element);
+          break;
+      }
+
+      // Setup parallax if enabled
+      if (isParallax && !prefersReducedMotion()) {
+        setupParallax(element);
+      }
+
+      // Animate scroll indicator
+      animateScrollIndicator(element);
+    });
+  }
+
+  /**
+   * Show hero immediately without animation
+   */
+  function showHeroImmediately(hero: HTMLElement) {
+    const animatedElements = hero.querySelectorAll('[data-animate]');
+    animatedElements.forEach((el) => {
+      (el as HTMLElement).style.opacity = '1';
+      (el as HTMLElement).style.transform = 'none';
+    });
+  }
+
+  /**
+   * Staggered entrance animation
+   */
+  function animateHeroStagger(hero: HTMLElement, initialDelay: number, staggerDelay: number) {
+    const subtitle = hero.querySelector('[data-animate="subtitle"]');
+    const title = hero.querySelector('[data-animate="title"]');
+    const description = hero.querySelector('[data-animate="description"]');
+    const cta = hero.querySelector('[data-animate="cta"]');
+
+    const elements = [subtitle, title, description, cta].filter(Boolean);
+
+    elements.forEach((el, index) => {
+      const element = el as HTMLElement;
+      element.style.opacity = '0';
+      element.style.transform = 'translateY(30px)';
+    });
+
+    anime({
+      targets: elements,
+      translateY: [30, 0],
+      opacity: [0, 1],
+      duration: 800,
+      delay: anime.stagger(staggerDelay, { start: initialDelay }),
+      easing: 'easeOutExpo',
+    });
+  }
+
+  /**
+   * Fade animation
+   */
+  function animateHeroFade(hero: HTMLElement, initialDelay: number) {
+    const content = hero.querySelector('.hero-content');
+    if (!content) return;
+
+    (content as HTMLElement).style.opacity = '0';
+
+    anime({
+      targets: content,
+      opacity: [0, 1],
+      duration: 1000,
+      delay: initialDelay,
+      easing: 'easeOutQuad',
+    });
+  }
+
+  /**
+   * Slide animation
+   */
+  function animateHeroSlide(hero: HTMLElement, initialDelay: number) {
+    const content = hero.querySelector('.hero-content');
+    if (!content) return;
+
+    (content as HTMLElement).style.opacity = '0';
+    (content as HTMLElement).style.transform = 'translateY(50px)';
+
+    anime({
+      targets: content,
+      translateY: [50, 0],
+      opacity: [0, 1],
+      duration: 1000,
+      delay: initialDelay,
+      easing: 'easeOutExpo',
+    });
+  }
+
+  /**
+   * Setup parallax scroll effect
+   */
+  function setupParallax(hero: HTMLElement) {
+    const background = hero.querySelector('[data-parallax-layer="background"]');
+    if (!background) return;
+
+    let ticking = false;
+
+    const updateParallax = () => {
+      const scrolled = window.pageYOffset;
+      const rect = hero.getBoundingClientRect();
+      const heroTop = rect.top + scrolled;
+      const heroHeight = rect.height;
+
+      // Only apply parallax when hero is in viewport
+      if (scrolled < heroTop + heroHeight) {
+        const parallaxSpeed = 0.5;
+        const yPos = (scrolled - heroTop) * parallaxSpeed;
+
+        (background as HTMLElement).style.transform = `translateY(${yPos}px)`;
+      }
+
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateParallax);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  /**
+   * Animate scroll indicator
+   */
+  function animateScrollIndicator(hero: HTMLElement) {
+    const indicator = hero.querySelector('[data-animate="scroll-indicator"]');
+    if (!indicator) return;
+
+    (indicator as HTMLElement).style.opacity = '0';
+
+    anime({
+      targets: indicator,
+      opacity: [0, 1],
+      translateY: [
+        { value: -10, duration: 600 },
+        { value: 0, duration: 600 },
+      ],
+      delay: 1500,
+      easing: 'easeInOutSine',
+      loop: true,
+    });
+  }
+
+  // Initialize on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHeroAnimations);
+  } else {
+    initHeroAnimations();
+  }
+
+  // Re-initialize on Astro view transitions
+  document.addEventListener('astro:page-load', initHeroAnimations);
+</script>
+
+<style>
+  .animated-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  /* Heights */
+  .animated-hero.height-small {
+    min-height: 40vh;
+  }
+
+  .animated-hero.height-medium {
+    min-height: 60vh;
+  }
+
+  .animated-hero.height-large {
+    min-height: 80vh;
+  }
+
+  .animated-hero.height-full {
+    min-height: 100vh;
+  }
+
+  /* Background */
+  .hero-background {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: -2;
+  }
+
+  .hero-background.parallax {
+    will-change: transform;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(0, 0, 0, 0.7) 0%,
+      rgba(0, 0, 0, 0.5) 100%
+    );
+    z-index: -1;
+  }
+
+  /* Content */
+  .hero-content {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    width: 100%;
+    z-index: 1;
+  }
+
+  /* Alignment */
+  .animated-hero.align-left .hero-content {
+    text-align: left;
+  }
+
+  .animated-hero.align-center .hero-content {
+    text-align: center;
+  }
+
+  .animated-hero.align-right .hero-content {
+    text-align: right;
+  }
+
+  /* Typography */
+  .hero-subtitle {
+    font-size: 1rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+  }
+
+  .hero-title {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-description {
+    font-size: clamp(1.125rem, 2vw, 1.5rem);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    max-width: 700px;
+  }
+
+  .animated-hero.align-center .hero-description {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .animated-hero.align-right .hero-description {
+    margin-left: auto;
+  }
+
+  /* CTA */
+  .hero-cta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .animated-hero.align-center .hero-cta {
+    justify-content: center;
+  }
+
+  .animated-hero.align-right .hero-cta {
+    justify-content: flex-end;
+  }
+
+  /* Scroll indicator */
+  .hero-scroll-indicator {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: currentColor;
+    opacity: 0.7;
+    cursor: pointer;
+    z-index: 2;
+  }
+
+  .hero-scroll-indicator svg {
+    display: block;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero-content {
+      padding: 1.5rem;
+    }
+
+    .hero-subtitle {
+      font-size: 0.875rem;
+    }
+
+    .hero-cta {
+      flex-direction: column;
+    }
+
+    .hero-scroll-indicator {
+      bottom: 1rem;
+    }
+  }
+
+  /* Respect reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .animated-hero,
+    .animated-hero * {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    .hero-background {
+      transform: none !important;
+    }
+
+    [data-animate] {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+
+  /* Dark mode support */
+  @media (prefers-color-scheme: dark) {
+    .hero-overlay {
+      background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.8) 0%,
+        rgba(0, 0, 0, 0.6) 100%
+      );
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .animated-hero {
+      min-height: auto;
+      page-break-inside: avoid;
+    }
+
+    .hero-scroll-indicator {
+      display: none;
+    }
+  }
+</style>

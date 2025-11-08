@@ -1,0 +1,127 @@
+# Cloudflare Pages Security Headers
+# Applied to all routes unless overridden by more specific rules
+
+# Global Security Headers
+/*
+  # Prevent clickjacking
+  X-Frame-Options: DENY
+
+  # Prevent MIME type sniffing
+  X-Content-Type-Options: nosniff
+
+  # Enable XSS protection (legacy browsers)
+  X-XSS-Protection: 1; mode=block
+
+  # Referrer policy
+  Referrer-Policy: strict-origin-when-cross-origin
+
+  # Permissions policy - restrict browser features
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+
+  # HSTS - Force HTTPS (enable after testing)
+  # Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+  # Content Security Policy
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://reactorjet.ddev.site https://*.wp.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';
+
+  # Additional security headers
+  X-Permitted-Cross-Domain-Policies: none
+  X-Download-Options: noopen
+  X-DNS-Prefetch-Control: off
+
+# Static Assets - Aggressive Caching
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# JavaScript and CSS - Long-term caching
+/*.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.css
+  Cache-Control: public, max-age=31536000, immutable
+
+# Images - Cache for 1 year
+/*.jpg
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.jpeg
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.png
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.webp
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.avif
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.svg
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.gif
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.ico
+  Cache-Control: public, max-age=31536000, immutable
+
+# Fonts - Cache for 1 year
+/*.woff
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.ttf
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.otf
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.eot
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML Pages - Shorter cache, must revalidate
+/*.html
+  Cache-Control: public, max-age=3600, must-revalidate
+
+# API Routes (if any) - No caching
+/api/*
+  Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate
+  Pragma: no-cache
+  Expires: 0
+
+# Sitemap and Robots - Cache for 1 day
+/sitemap*.xml
+  Cache-Control: public, max-age=86400
+
+/robots.txt
+  Cache-Control: public, max-age=86400
+
+# RSS/Atom feeds (if any) - Cache for 1 hour
+/*.xml
+  Cache-Control: public, max-age=3600
+
+/*.rss
+  Cache-Control: public, max-age=3600
+
+/*.atom
+  Cache-Control: public, max-age=3600
+
+# JSON data files - Cache for 5 minutes
+/*.json
+  Cache-Control: public, max-age=300
+
+# Service Worker - No caching
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/service-worker.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# Manifest files - Cache for 1 day
+/manifest.json
+  Cache-Control: public, max-age=86400
+
+/manifest.webmanifest
+  Cache-Control: public, max-age=86400
