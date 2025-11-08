@@ -23,6 +23,7 @@ npx convex dev
 ```
 
 This will:
+
 - Create a `convex/` directory
 - Set up your Convex project
 - Generate API files
@@ -49,6 +50,7 @@ npx convex deploy
 ### 5. Create Your First Function
 
 Functions are already created in `convex/`:
+
 - `convex/workflows.ts` - Workflow functions
 - `convex/assets.ts` - Asset functions
 - `convex/deployments.ts` - Deployment functions
@@ -63,16 +65,16 @@ npx convex deploy
 ### 6. Use in Your Code
 
 ```typescript
-import { DatabaseManager } from '@repo/scripts/database/database-manager';
+import { DatabaseManager } from "@repo/scripts/database/database-manager";
 
 const db = new DatabaseManager();
 await db.connect();
 
 // Using Convex functions (recommended)
-const workflows = await db.queryFunction('workflows.list');
-const id = await db.mutateFunction('workflows.create', {
-  id: 'workflow-1',
-  name: 'My Workflow',
+const workflows = await db.queryFunction("workflows.list");
+const id = await db.mutateFunction("workflows.create", {
+  id: "workflow-1",
+  name: "My Workflow",
   steps: [],
 });
 ```
@@ -87,8 +89,8 @@ const id = await db.mutateFunction('workflows.create', {
 ## Fallback
 
 If Convex is not available, the system automatically falls back to:
+
 1. PostgreSQL (if `DATABASE_URL` is set)
 2. File-based storage (always available)
 
 See `docs/CONVEX_INTEGRATION.md` for complete documentation.
-

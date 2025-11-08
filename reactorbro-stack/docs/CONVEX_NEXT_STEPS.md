@@ -3,16 +3,19 @@
 ## Current Status
 
 ✅ **Convex Storage Adapters Created**
+
 - `agents/core/convex-storage.ts` - Workflow storage
 - `assets/core/convex-storage.ts` - Asset storage
 - `packages/scripts/src/deployment/convex-storage.ts` - Deployment storage
 
 ✅ **Systems Integrated**
+
 - WorkflowEngine - Uses Convex when available
 - AssetManager - Uses Convex when available
 - DeploymentIntelligence - Uses Convex when available
 
 ✅ **Convex Functions Created**
+
 - `convex/workflows.ts` - Workflow CRUD operations
 - `convex/assets.ts` - Asset CRUD operations
 - `convex/deployments.ts` - Deployment CRUD operations
@@ -52,6 +55,7 @@ pnpm convex:deploy
 ```
 
 This will:
+
 - Deploy all functions in `convex/` directory
 - Generate API files in `convex/_generated/`
 - Set up your database schema
@@ -63,6 +67,7 @@ pnpm convex:verify
 ```
 
 This will test:
+
 - Environment configuration
 - Database connection
 - WorkflowEngine integration
@@ -94,12 +99,12 @@ pnpm deploy:list         # Deployment list (uses Convex)
 ### Test Workflow Storage
 
 ```typescript
-import { WorkflowEngine } from '@repo/agents/core/workflow-engine';
+import { WorkflowEngine } from "@repo/agents/core/workflow-engine";
 
 const engine = new WorkflowEngine();
 await engine.loadWorkflow({
-  id: 'test-1',
-  name: 'Test Workflow',
+  id: "test-1",
+  name: "Test Workflow",
   steps: [],
 });
 
@@ -109,13 +114,13 @@ await engine.loadWorkflow({
 ### Test Asset Storage
 
 ```typescript
-import { AssetManager } from '@repo/assets/core/asset-manager';
+import { AssetManager } from "@repo/assets/core/asset-manager";
 
 const manager = new AssetManager();
 await manager.registerAsset({
-  id: 'asset-1',
-  name: 'Test Asset',
-  category: 'ui-components',
+  id: "asset-1",
+  name: "Test Asset",
+  category: "ui-components",
   // ... other fields
 });
 
@@ -125,12 +130,12 @@ await manager.registerAsset({
 ### Test Deployment Storage
 
 ```typescript
-import { DeploymentIntelligence } from '@repo/scripts/deployment-intelligence';
+import { DeploymentIntelligence } from "@repo/scripts/deployment-intelligence";
 
 const intelligence = new DeploymentIntelligence();
-const deployment = intelligence.createDeployment('site-1', {
-  siteId: 'site-1',
-  platform: 'cloudflare-pages',
+const deployment = intelligence.createDeployment("site-1", {
+  siteId: "site-1",
+  platform: "cloudflare-pages",
 });
 
 // Check Convex dashboard to see it saved
@@ -141,11 +146,13 @@ const deployment = intelligence.createDeployment('site-1', {
 ## Convex Dashboard
 
 Access your dashboard:
+
 - **URL:** https://dashboard.convex.dev
 - **Team:** tim-a6744
 - **Project:** stack-3d50f
 
 From the dashboard you can:
+
 - View your data (workflows, assets, deployments)
 - Monitor function executions
 - View logs and errors
@@ -213,4 +220,3 @@ Once Convex is configured and functions are deployed:
 **Last Updated:** December 2024
 **Status:** Ready for deployment
 **Next:** Run `pnpm convex:deploy` to deploy functions
-

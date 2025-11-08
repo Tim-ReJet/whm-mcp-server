@@ -1,7 +1,7 @@
 import type { Workflow, WorkflowStep, Context, ExecutionPlan, ExecutionStep } from './types';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
-import { AgentOrchestrator } from './orchestrator';
+import type { AgentOrchestrator } from './orchestrator';
 import { ConvexWorkflowStorage } from './convex-storage';
 
 export class WorkflowEngine {

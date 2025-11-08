@@ -3,12 +3,12 @@
  * Provides Convex-backed storage with file-based fallback
  */
 
-import { DatabaseManager } from '../database/database-manager.js';
-import type { Deployment } from '../deployment-intelligence.js';
+import { DatabaseManager } from "../database/database-manager.js";
+import type { Deployment } from "../deployment-intelligence.js";
 
 export class ConvexDeploymentStorage {
   private db: DatabaseManager;
-  private useConvex: boolean = false;
+  private useConvex = false;
 
   constructor() {
     this.db = new DatabaseManager();
@@ -19,7 +19,7 @@ export class ConvexDeploymentStorage {
       await this.db.connect();
       if (process.env.CONVEX_URL) {
         try {
-          await this.db.queryFunction('deployments.list', { limit: 1 });
+          await this.db.queryFunction("deployments.list", { limit: 1 });
           this.useConvex = true;
         } catch {
           this.useConvex = false;
@@ -36,7 +36,7 @@ export class ConvexDeploymentStorage {
   async saveDeployment(deployment: Deployment): Promise<void> {
     if (this.useConvex) {
       try {
-        const existing = await this.db.queryFunction('deployments.get', {
+        const existing = await this.db.queryFunction("deployments.get", {
           id: deployment.id,
         });
 
@@ -47,13 +47,14 @@ export class ConvexDeploymentStorage {
           healthCheckStatus: deployment.healthCheckStatus,
           error: deployment.error,
           rollbackId: deployment.rollbackId,
-          buildTime: deployment.completedAt && deployment.startedAt
-            ? deployment.completedAt.getTime() - deployment.startedAt.getTime()
-            : undefined,
+          buildTime:
+            deployment.completedAt && deployment.startedAt
+              ? deployment.completedAt.getTime() - deployment.startedAt.getTime()
+              : undefined,
         };
 
         if (existing) {
-          await this.db.mutateFunction('deployments.update', {
+          await this.db.mutateFunction("deployments.update", {
             id: deployment.id,
             updates: {
               ...deploymentData,
@@ -61,22 +62,22 @@ export class ConvexDeploymentStorage {
             },
           });
         } else {
-          await this.db.mutateFunction('deployments.create', {
+          await this.db.mutateFunction("deployments.create", {
             id: deployment.id,
             siteId: deployment.siteId,
             status: deployment.status,
-            environment: 'production', // Could be passed as parameter
+            environment: "production", // Could be passed as parameter
             commitHash: undefined, // Could be extracted from deployment
             branch: undefined,
             changes: undefined,
           });
-          await this.db.mutateFunction('deployments.update', {
+          await this.db.mutateFunction("deployments.update", {
             id: deployment.id,
             updates: deploymentData,
           });
         }
       } catch (error) {
-        console.warn('Failed to save deployment to Convex:', error);
+        console.warn("Failed to save deployment to Convex:", error);
       }
     }
   }
@@ -87,18 +88,16 @@ export class ConvexDeploymentStorage {
   async loadDeployment(deploymentId: string): Promise<Deployment | null> {
     if (this.useConvex) {
       try {
-        const deployment = await this.db.queryFunction('deployments.get', {
+        const deployment = await this.db.queryFunction("deployments.get", {
           id: deploymentId,
         });
         if (deployment) {
           return {
             id: deployment.id,
             siteId: deployment.siteId,
-            status: deployment.status as Deployment['status'],
+            status: deployment.status as Deployment["status"],
             startedAt: new Date(deployment.startedAt),
-            completedAt: deployment.completedAt
-              ? new Date(deployment.completedAt)
-              : undefined,
+            completedAt: deployment.completedAt ? new Date(deployment.completedAt) : undefined,
             buildArtifacts: deployment.buildArtifacts,
             healthCheckStatus: deployment.healthCheckStatus,
             error: deployment.error,
@@ -106,7 +105,7 @@ export class ConvexDeploymentStorage {
           };
         }
       } catch (error) {
-        console.warn('Failed to load deployment from Convex:', error);
+        console.warn("Failed to load deployment from Convex:", error);
       }
     }
     return null;
@@ -119,11 +118,11 @@ export class ConvexDeploymentStorage {
     if (this.useConvex) {
       try {
         // Use the list function which doesn't require siteId
-        const deployments = await this.db.queryFunction('deployments.list', { limit });
+        const deployments = await this.db.queryFunction("deployments.list", { limit });
         return deployments.map((d: any) => ({
           id: d.id,
           siteId: d.siteId,
-          status: d.status as Deployment['status'],
+          status: d.status as Deployment["status"],
           startedAt: new Date(d.startedAt),
           completedAt: d.completedAt ? new Date(d.completedAt) : undefined,
           buildArtifacts: d.buildArtifacts,
@@ -132,7 +131,7 @@ export class ConvexDeploymentStorage {
           rollbackId: d.rollbackId,
         }));
       } catch (error) {
-        console.warn('Failed to list all deployments from Convex:', error);
+        console.warn("Failed to list all deployments from Convex:", error);
       }
     }
     return [];
@@ -144,14 +143,14 @@ export class ConvexDeploymentStorage {
   async listDeployments(siteId: string, limit?: number): Promise<Deployment[]> {
     if (this.useConvex) {
       try {
-        const deployments = await this.db.queryFunction('deployments.getBySite', {
+        const deployments = await this.db.queryFunction("deployments.getBySite", {
           siteId,
           limit,
         });
         return deployments.map((d: any) => ({
           id: d.id,
           siteId: d.siteId,
-          status: d.status as Deployment['status'],
+          status: d.status as Deployment["status"],
           startedAt: new Date(d.startedAt),
           completedAt: d.completedAt ? new Date(d.completedAt) : undefined,
           buildArtifacts: d.buildArtifacts,
@@ -160,7 +159,7 @@ export class ConvexDeploymentStorage {
           rollbackId: d.rollbackId,
         }));
       } catch (error) {
-        console.warn('Failed to list deployments from Convex:', error);
+        console.warn("Failed to list deployments from Convex:", error);
       }
     }
     return [];
@@ -172,18 +171,16 @@ export class ConvexDeploymentStorage {
   async getLatestDeployment(siteId: string): Promise<Deployment | null> {
     if (this.useConvex) {
       try {
-        const deployment = await this.db.queryFunction('deployments.getLatest', {
+        const deployment = await this.db.queryFunction("deployments.getLatest", {
           siteId,
         });
         if (deployment) {
           return {
             id: deployment.id,
             siteId: deployment.siteId,
-            status: deployment.status as Deployment['status'],
+            status: deployment.status as Deployment["status"],
             startedAt: new Date(deployment.startedAt),
-            completedAt: deployment.completedAt
-              ? new Date(deployment.completedAt)
-              : undefined,
+            completedAt: deployment.completedAt ? new Date(deployment.completedAt) : undefined,
             buildArtifacts: deployment.buildArtifacts,
             healthCheckStatus: deployment.healthCheckStatus,
             error: deployment.error,
@@ -191,7 +188,7 @@ export class ConvexDeploymentStorage {
           };
         }
       } catch (error) {
-        console.warn('Failed to get latest deployment from Convex:', error);
+        console.warn("Failed to get latest deployment from Convex:", error);
       }
     }
     return null;
@@ -200,16 +197,16 @@ export class ConvexDeploymentStorage {
   /**
    * Get deployments by status
    */
-  async getDeploymentsByStatus(status: Deployment['status']): Promise<Deployment[]> {
+  async getDeploymentsByStatus(status: Deployment["status"]): Promise<Deployment[]> {
     if (this.useConvex) {
       try {
-        const deployments = await this.db.queryFunction('deployments.getByStatus', {
+        const deployments = await this.db.queryFunction("deployments.getByStatus", {
           status,
         });
         return deployments.map((d: any) => ({
           id: d.id,
           siteId: d.siteId,
-          status: d.status as Deployment['status'],
+          status: d.status as Deployment["status"],
           startedAt: new Date(d.startedAt),
           completedAt: d.completedAt ? new Date(d.completedAt) : undefined,
           buildArtifacts: d.buildArtifacts,
@@ -218,10 +215,9 @@ export class ConvexDeploymentStorage {
           rollbackId: d.rollbackId,
         }));
       } catch (error) {
-        console.warn('Failed to get deployments by status from Convex:', error);
+        console.warn("Failed to get deployments by status from Convex:", error);
       }
     }
     return [];
   }
 }
-

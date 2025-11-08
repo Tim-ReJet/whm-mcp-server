@@ -3,9 +3,9 @@
  * Manages deployment queues, change detection, and deployment orchestration
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
-import { join, resolve } from 'path';
 import { execSync } from 'child_process';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { join, resolve } from 'path';
 import { logger } from '../../observability/src/logging/logger.js';
 import { metricsRegistry } from '../../observability/src/metrics/metrics.js';
 import { ConvexDeploymentStorage } from './deployment/convex-storage.js';
@@ -42,11 +42,11 @@ export interface ChangeDetection {
 export class DeploymentIntelligence {
   private deployments: Map<string, Deployment> = new Map();
   private queue: string[] = [];
-  private parallelLimit: number = 3;
+  private parallelLimit = 3;
   private deploymentsDir: string;
   private convexStorage?: ConvexDeploymentStorage;
 
-  constructor(deploymentsDir: string = '.deployments') {
+  constructor(deploymentsDir = '.deployments') {
     this.deploymentsDir = resolve(deploymentsDir);
     if (!existsSync(this.deploymentsDir)) {
       mkdirSync(this.deploymentsDir, { recursive: true });
@@ -66,7 +66,7 @@ export class DeploymentIntelligence {
   /**
    * Detect changes from git diff
    */
-  detectChanges(baseRef: string = 'HEAD^', headRef: string = 'HEAD'): ChangeDetection {
+  detectChanges(baseRef = 'HEAD^', headRef = 'HEAD'): ChangeDetection {
     try {
       const changedFiles = execSync(`git diff --name-only ${baseRef} ${headRef}`, {
         encoding: 'utf-8',

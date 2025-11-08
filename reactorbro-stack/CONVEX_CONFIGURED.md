@@ -3,10 +3,12 @@
 ## What Just Happened
 
 You've configured Convex to use your existing project:
+
 - **Team:** tim-a6744
 - **Project:** stack-3d50f
 
 Convex should have created:
+
 - `convex.json` - Project configuration
 - `.env.local` - Contains `CONVEX_URL` (if not exists)
 
@@ -23,6 +25,7 @@ cat convex.json
 ```
 
 You should see something like:
+
 ```json
 {
   "team": "tim-a6744",
@@ -55,6 +58,7 @@ npx convex deploy
 ```
 
 This will:
+
 - Deploy all functions in `convex/` directory
 - Generate API files in `convex/_generated/`
 - Set up your database schema
@@ -101,7 +105,7 @@ await engine.loadWorkflow(workflow); // Saved to Convex!
 
 // AssetManager automatically uses Convex
 const manager = new AssetManager();
-const assets = await manager.searchAssets({ q: 'button' }); // Searches Convex!
+const assets = await manager.searchAssets({ q: "button" }); // Searches Convex!
 
 // DeploymentIntelligence automatically uses Convex
 const intelligence = new DeploymentIntelligence();
@@ -113,11 +117,13 @@ const deployment = intelligence.createDeployment(siteId, config); // Saved to Co
 ## Convex Dashboard
 
 Access your Convex dashboard:
+
 - **URL:** https://dashboard.convex.dev
 - **Team:** tim-a6744
 - **Project:** stack-3d50f
 
 From the dashboard you can:
+
 - View your data
 - Monitor function executions
 - View logs
@@ -150,6 +156,7 @@ cat convex.json
 ### Functions Not Found?
 
 Make sure functions are deployed:
+
 ```bash
 npx convex deploy
 ```
@@ -161,26 +168,29 @@ Then check `convex/_generated/api.js` exists.
 ## Quick Reference
 
 ### Deploy Functions
+
 ```bash
 npx convex dev          # Watch mode (auto-deploy on changes)
 npx convex deploy       # Deploy once
 ```
 
 ### View Data
+
 ```bash
 # Use Convex dashboard
 open https://dashboard.convex.dev
 ```
 
 ### Test Functions
+
 ```typescript
-import { DatabaseManager } from '@repo/scripts/database/database-manager';
+import { DatabaseManager } from "@repo/scripts/database/database-manager";
 
 const db = new DatabaseManager();
 await db.connect();
 
 // Test workflow list
-const workflows = await db.queryFunction('workflows.list');
+const workflows = await db.queryFunction("workflows.list");
 console.log(workflows);
 ```
 
@@ -191,6 +201,7 @@ console.log(workflows);
 **Convex Configuration** - ✅ **COMPLETE**
 
 Your project is now connected to:
+
 - Team: tim-a6744
 - Project: stack-3d50f
 
@@ -200,4 +211,3 @@ All systems will automatically use Convex when `CONVEX_URL` is set!
 
 **Last Updated:** December 2024
 **Next:** Run `npx convex dev` to deploy functions
-
