@@ -1,0 +1,72 @@
+name: Branch Cleanup
+
+on:
+  schedule:
+    # Run weekly on Monday at 2 AM UTC
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  cleanup:
+    name: Cleanup Merged Branches
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch all branches
+        run: git fetch --all --prune
+
+      - name: Delete merged branches
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: branches } = await github.rest.repos.listBranches({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const protectedBranches = ['main', 'develop', 'master'];
+            const mergedBranches = [];
+
+            for (const branch of branches) {
+              if (protectedBranches.includes(branch.name)) {
+                continue;
+              }
+
+              try {
+                const { data: comparison } = await github.rest.repos.compareCommits({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  base: 'main',
+                  head: branch.name,
+                });
+
+                if (comparison.status === 'identical' || comparison.status === 'behind') {
+                  mergedBranches.push(branch.name);
+                }
+              } catch (error) {
+                console.log(`Could not check branch ${branch.name}: ${error.message}`);
+              }
+            }
+
+            for (const branchName of mergedBranches) {
+              try {
+                await github.rest.git.deleteRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `heads/${branchName}`,
+                });
+                console.log(`Deleted merged branch: ${branchName}`);
+              } catch (error) {
+                console.log(`Could not delete branch ${branchName}: ${error.message}`);
+              }
+            }
+
+            console.log(`Cleaned up ${mergedBranches.length} merged branches`);
+
