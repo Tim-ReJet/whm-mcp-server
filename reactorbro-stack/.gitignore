@@ -15,3 +15,10 @@ apps/astro/astro.config.*.mjs
 dist
 build
 theme.zip
+
+# Security: Files that may contain tokens or secrets
+GITHUB_TOKEN_QUICK_SETUP.md
+*_TOKEN*.md
+*_SECRET*.md
+*.key
+*.pem
