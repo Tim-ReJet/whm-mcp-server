@@ -1,0 +1,109 @@
+# Auto-label PRs based on changed files
+
+# Astro app changes
+'area/astro':
+  - 'apps/astro/**'
+
+# WordPress changes
+'area/wp':
+  - 'apps/wp/**'
+
+# Design tokens
+'area/tokens':
+  - 'packages/tokens/**'
+
+# UI components
+'area/ui':
+  - 'packages/ui/**'
+
+# Scripts
+'area/scripts':
+  - 'packages/scripts/**'
+
+# Observability
+'area/observability':
+  - 'packages/observability/**'
+
+# MCP
+'area/mcp':
+  - 'packages/mcp/**'
+
+# Animations
+'area/animations':
+  - 'packages/animations/**'
+
+# Agents
+'area/agents':
+  - 'agents/**'
+
+# Assets
+'area/assets':
+  - 'assets/**'
+
+# Documentation
+'area/docs':
+  - 'docs/**'
+  - '*.md'
+  - '.github/**/*.md'
+
+# Convex
+'area/convex':
+  - 'convex/**'
+
+# Configuration
+'area/config':
+  - '*.json'
+  - '*.yml'
+  - '*.yaml'
+  - 'tsconfig.json'
+  - 'turbo.json'
+  - 'pnpm-workspace.yaml'
+  - 'biome.json'
+  - 'commitlint.config.js'
+
+# CI/CD
+'area/ci':
+  - '.github/workflows/**'
+
+# Dependencies
+'type/dependencies':
+  - 'package.json'
+  - 'pnpm-lock.yaml'
+
+# Breaking changes
+'breaking-change':
+  - '**/*BREAKING*'
+  - '**/*breaking*'
+
+# Bug fixes
+'type/bug':
+  - '**/*fix*'
+  - '**/*bug*'
+
+# Features
+'type/feature':
+  - '**/*feat*'
+  - '**/*feature*'
+
+# Documentation
+'type/docs':
+  - '**/*.md'
+  - 'docs/**'
+
+# Tests
+'type/test':
+  - '**/*.test.ts'
+  - '**/*.test.tsx'
+  - '**/*.spec.ts'
+  - '**/*.spec.tsx'
+  - 'tests/**'
+
+# Refactoring
+'type/refactor':
+  - '**/*refactor*'
+
+# Performance
+'type/performance':
+  - '**/*perf*'
+  - '**/*performance*'
+
